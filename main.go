@@ -18,8 +18,7 @@ import (
 
 var (
 	flagConfigFile string
-	// state          *boilingcore.State
-	state db.SchemanState
+	state          *db.SchemanState
 )
 
 func main() {
@@ -50,6 +49,7 @@ func main() {
 	viper.AutomaticEnv()
 
 	if err := rootCmd.Execute(); err != nil {
+		color.Red("%v\n", err)
 		os.Exit(1)
 	}
 }
@@ -86,7 +86,7 @@ func setState(cmd *cobra.Command, args []string) error {
 
 	config.Imports = importers.NewDefaultImports()
 
-	state.State, err = boilingcore.New(config)
+	state, err = db.New(config)
 	return err
 }
 
@@ -154,6 +154,7 @@ func initConfig() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	color.Green(state.Config.DriverName) // @TODO del
 	return state.Run()
 }
 

@@ -4,13 +4,13 @@ go 1.17
 
 require (
 	github.com/fatih/color v1.13.0
+	github.com/friendsofgo/errors v0.9.2
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/volatiletech/sqlboiler/v4 v4.8.6
 )
 
 require (
-	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
