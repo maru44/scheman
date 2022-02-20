@@ -18,11 +18,6 @@ type (
 	}
 )
 
-const (
-	TableIDsTableName     = "Table Name"
-	TableIDsNotionTableID = "DB ID defining Table"
-)
-
 func NewNotion(pageID, tableListDBID, token string) definition.Definition {
 	return &Notion{
 		PageID:        pageID,

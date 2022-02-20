@@ -6,15 +6,15 @@ import (
 
 type (
 	listTable struct {
-		TableName       string
-		TableIDInNotion string
+		TableName string
+		PageID    string
 	}
 
 	listTableResponse struct {
-		TableName       gn.PageTitle `json:"Table Name"`
-		TableIDInNotion struct {
+		TableName gn.PageTitle `json:"Table Name"`
+		PageID    struct {
 			R []gn.RichText `json:"rich_text,omitempty"`
-		} `json:"DB ID defining Table"`
+		} `json:"Page ID"`
 	}
 )
 
@@ -22,14 +22,14 @@ func (l *listTableResponse) toList() *listTable {
 	if len(l.TableName.Title) == 0 || l.TableName.Title[0].PlainText == "" {
 		return nil
 	}
-	if len(l.TableIDInNotion.R) == 0 {
+	if len(l.PageID.R) == 0 {
 		return &listTable{
 			TableName: l.TableName.Title[0].PlainText,
 		}
 	}
 
 	return &listTable{
-		TableName:       l.TableName.Title[0].PlainText,
-		TableIDInNotion: l.TableIDInNotion.R[0].PlainText,
+		TableName: l.TableName.Title[0].PlainText,
+		PageID:    l.PageID.R[0].PlainText,
 	}
 }
