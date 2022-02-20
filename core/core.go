@@ -12,10 +12,12 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
-type SchemanState struct {
-	*boilingcore.State
-	Defs map[definition.Platform]definition.Definition
-}
+type (
+	SchemanState struct {
+		*boilingcore.State
+		Defs map[definition.Platform]definition.Definition
+	}
+)
 
 func New(config *boilingcore.Config) (*SchemanState, error) {
 	s := &SchemanState{
@@ -36,6 +38,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			viper.GetString("notion_page_id"),
 			viper.GetString("notion_table_list_id"),
 			viper.GetString("notion_token"),
+			s.Tables,
 		)
 	}
 
@@ -81,7 +84,9 @@ func (s *SchemanState) Run() error {
 	ctx := context.Background()
 	for _, def := range s.Defs {
 		def.GetCurrent(ctx)
+
 	}
+
 	return nil
 }
 

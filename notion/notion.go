@@ -2,83 +2,78 @@ package notion
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/maru44/scheman/definition"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 type (
 	Notion struct {
-		PageID        string
-		TableListDBID string
-		cli           *gn.Client
+		PageID             string
+		TableListDBID      string
+		cli                *gn.Client
+		TablesByConnection []drivers.Table
 	}
 )
 
-func NewNotion(pageID, tableListDBID, token string) definition.Definition {
+func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table) definition.Definition {
 	return &Notion{
-		PageID:        pageID,
-		TableListDBID: tableListDBID,
-		cli:           gn.NewClient(token),
+		PageID:             pageID,
+		TableListDBID:      tableListDBID,
+		cli:                gn.NewClient(token),
+		TablesByConnection: tables,
 	}
 }
 
-func (n *Notion) GetCurrent(ctx context.Context) {
+func (n *Notion) GetCurrent(ctx context.Context) error {
 	ls, err := n.getListTable(ctx)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
-	// fmt.Println(ls)
-	for _, l := range ls {
-		fmt.Println(l)
+	tablesByName := map[string]definition.Table{}
+	tablesDefinedInNotion := make([]definition.Table, len(ls))
+	for i, l := range ls {
+		t, err := n.getDefTable(ctx, l.PageID, l.TableName)
+		if err != nil {
+			return err
+		}
+		tablesDefinedInNotion[i] = *t
+		tablesByName[l.TableName] = *t
 	}
+
+	tablesByConnection := n.TablesByConnection
+	for _, tc := range tablesByConnection {
+		if tn, ok := tablesByName[tc.Name]; ok {
+			// update all table rows
+			for _, col := range tc.Columns {
+				updated := false
+
+				// update
+				for _, colN := range tn.Columns {
+					if col.Name == colN.Name {
+						n.updateDefRow(ctx, colN)
+						updated = true
+						break
+					}
+				}
+
+				if !updated {
+					c := definition.ConvertCol(col, tc.PKey)
+					n.createDefRow(ctx, tn.PageID, c)
+				}
+			}
+			continue
+		}
+		// insert table
+	}
+
+	// for _, tn := range tablesDefinedInNotion {
+	// }
+
+	return nil
 }
 
-func (n *Notion) Upsert() {}
+func (n *Notion) Upsert(ctx context.Context) {
 
-func (n *Notion) getListTable(ctx context.Context) ([]*listTable, error) {
-	hasNext := true
-	startCursor := ""
-	var res []gn.Page
-	for hasNext {
-		query := &gn.DatabaseQuery{
-			StartCursor: startCursor,
-		}
-		q, err := n.cli.QueryDatabase(ctx, n.TableListDBID, query)
-		if err != nil {
-			if errors.Is(err, gn.ErrValidation) {
-				fmt.Println("validation")
-				// @TODO impl
-				// create database for list table
-			}
-			fmt.Println(err) // @TODO delete
-			return nil, err
-		}
-		res = append(res, q.Results...)
-
-		hasNext = q.HasMore
-		if q.NextCursor != nil {
-			startCursor = *q.NextCursor
-		}
-	}
-
-	var ls []*listTable
-	for _, r := range res {
-		j, err := json.Marshal(r.Properties)
-		if err != nil {
-			return nil, err
-		}
-
-		var props listTableResponse
-		if err := json.Unmarshal(j, &props); err != nil {
-			return nil, err
-		}
-		if l := props.toList(); l != nil {
-			ls = append(ls, l)
-		}
-	}
-	return ls, nil
 }

@@ -1,11 +1,13 @@
 package definition
 
-import "context"
+import (
+	"context"
+)
 
 type (
 	Definition interface {
-		GetCurrent(context.Context)
-		Upsert()
+		GetCurrent(context.Context) error
+		Upsert(context.Context)
 	}
 
 	Platform string
