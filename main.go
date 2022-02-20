@@ -8,7 +8,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/maru44/scheman/db"
+	"github.com/maru44/scheman/core"
+	"github.com/maru44/scheman/definition"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/v4/boilingcore"
@@ -18,7 +19,7 @@ import (
 
 var (
 	flagConfigFile string
-	state          *db.SchemanState
+	state          *core.SchemanState
 )
 
 func main() {
@@ -39,10 +40,12 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "c", "", "Filename of config file to override default lookup")
 	rootCmd.PersistentFlags().BoolP("add-enum-types", "", false, "Enable generation of types for enums")
 	rootCmd.PersistentFlags().StringP("enum-null-prefix", "", "Null", "Name prefix of nullable enum types")
-	rootCmd.PersistentFlags().StringP("output-type", "", "Notion", "Platform table definition")
-	rootCmd.PersistentFlags().StringP("output-page-id", "", "Null", "page id")
-	rootCmd.PersistentFlags().StringP("token", "", "Null", "Token or id for authentication") // recommend not to use
-	rootCmd.PersistentFlags().StringP("password", "", "Null", "Password for authentication") // recommend not to use
+
+	rootCmd.PersistentFlags().StringP("platform", "", definition.PlatformNotion, "Platform table definition")
+
+	rootCmd.PersistentFlags().StringP("notion_page_id", "", "Null", "Page id for notion")
+	rootCmd.PersistentFlags().StringP("notion_token", "", "Null", "Notion integration token")
+	rootCmd.PersistentFlags().StringP("notion_table_list_id", "", "Null", "Table List to refer table name and its definition database id")
 
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -86,7 +89,7 @@ func setState(cmd *cobra.Command, args []string) error {
 
 	config.Imports = importers.NewDefaultImports()
 
-	state, err = db.New(config)
+	state, err = core.New(config)
 	return err
 }
 
@@ -154,7 +157,6 @@ func initConfig() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	color.Green(state.Config.DriverName) // @TODO del
 	return state.Run()
 }
 

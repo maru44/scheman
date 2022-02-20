@@ -3,6 +3,7 @@ module github.com/maru44/scheman
 go 1.17
 
 require (
+	github.com/dstotijn/go-notion v0.6.0
 	github.com/fatih/color v1.13.0
 	github.com/friendsofgo/errors v0.9.2
 	github.com/spf13/cobra v1.2.1
