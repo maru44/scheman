@@ -1,6 +1,8 @@
 package definition
 
-import "github.com/volatiletech/sqlboiler/v4/drivers"
+import (
+	"github.com/volatiletech/sqlboiler/v4/drivers"
+)
 
 type (
 	Table struct {

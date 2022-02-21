@@ -95,6 +95,7 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 					if err := n.deleteDefTable(ctx, col.RowID); err != nil {
 						return err
 					}
+					// @TODO then delete row of listTable
 				}
 			}
 			continue
@@ -111,6 +112,9 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 			if err := n.createDefRow(ctx, *dbID, c); err != nil {
 				return err
 			}
+		}
+		if err := n.createListRow(ctx, tc.Name, *dbID); err != nil {
+			return err
 		}
 	}
 
