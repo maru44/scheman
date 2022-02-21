@@ -31,7 +31,7 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	tablesByName := map[string]definition.Table{}
+	tablesInNotionByName := map[string]definition.Table{}
 	tablesDefinedInNotion := make([]definition.Table, len(ls))
 	for i, l := range ls {
 		t, err := n.getDefTable(ctx, l.PageID, l.TableName)
@@ -39,37 +39,80 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 			return err
 		}
 		tablesDefinedInNotion[i] = *t
-		tablesByName[l.TableName] = *t
+		tablesInNotionByName[l.TableName] = *t
+	}
+	tablesByConnection := n.TablesByConnection
+
+	for _, tn := range tablesDefinedInNotion {
+		// judge if the table exists in connection.
+		existsInConnection := false
+		for _, tc := range tablesByConnection {
+			if tc.Name == tn.Name {
+				existsInConnection = true
+				break
+			}
+		}
+		if !existsInConnection {
+			// drop def table in notion
+		}
 	}
 
-	tablesByConnection := n.TablesByConnection
 	for _, tc := range tablesByConnection {
-		if tn, ok := tablesByName[tc.Name]; ok {
-			// update all table rows
-			for _, col := range tc.Columns {
-				updated := false
+		if tn, ok := tablesInNotionByName[tc.Name]; ok {
+			columnNamesByConnection := map[string]int{}
+			columnInNotionByColumnName := map[string]definition.Column{}
 
-				// update
-				for _, colN := range tn.Columns {
-					if col.Name == colN.Name {
-						n.updateDefRow(ctx, colN)
-						updated = true
-						break
+			for _, col := range tn.Columns {
+				columnInNotionByColumnName[col.Name] = col
+			}
+
+			// loop for connection columns
+			// update or create column in notion.
+			for _, col := range tc.Columns {
+				columnNamesByConnection[col.Name]++
+				// If column name already exists in notion, update the row in notion.
+				if _, ok := columnInNotionByColumnName[col.Name]; ok {
+					currentColumn := definition.ConvertCol(col, tc.PKey)
+					if err := n.updateDefRow(ctx, currentColumn); err != nil {
+						return err
 					}
+					continue
 				}
 
-				if !updated {
-					c := definition.ConvertCol(col, tc.PKey)
-					n.createDefRow(ctx, tn.PageID, c)
+				// If column name does not exists in notion, insert row in notion.
+				c := definition.ConvertCol(col, tc.PKey)
+				if err := n.createDefRow(ctx, tn.PageID, c); err != nil {
+					return err
+				}
+				continue
+			}
+
+			// loop for notion columns
+			// If column name does not exists in notion,
+			// delete the column in notion.
+			for columnNameN, col := range columnInNotionByColumnName {
+				if _, ok := columnNamesByConnection[columnNameN]; !ok {
+					if err := n.deleteDefTable(ctx, col.RowID); err != nil {
+						return err
+					}
 				}
 			}
 			continue
 		}
-		// insert table
-	}
 
-	// for _, tn := range tablesDefinedInNotion {
-	// }
+		// If table does not exists,
+		// insert table and insert columns as row.
+		dbID, err := n.createDefTable(ctx, tc.Name)
+		if err != nil {
+			return err
+		}
+		for _, col := range tc.Columns {
+			c := definition.ConvertCol(col, tc.PKey)
+			if err := n.createDefRow(ctx, *dbID, c); err != nil {
+				return err
+			}
+		}
+	}
 
 	return nil
 }

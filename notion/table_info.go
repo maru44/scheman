@@ -20,9 +20,11 @@ func (n *Notion) createDefTable(ctx context.Context, tableName string) (*string,
 		},
 		Properties: gn.DatabaseProperties{
 			"Column Name": gn.DatabaseProperty{
+				Type:  gn.DBPropTypeTitle,
 				Title: &gn.EmptyMetadata{},
 			},
 			"Data Type": gn.DatabaseProperty{
+				Type: gn.DBPropTypeSelect,
 				Select: &gn.SelectMetadata{
 					Options: []gn.SelectOptions{
 						{Name: "uuid", Color: gn.ColorDefault},
@@ -50,24 +52,31 @@ func (n *Notion) createDefTable(ctx context.Context, tableName string) (*string,
 			},
 			"Default": gn.DatabaseProperty{
 				RichText: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeRichText,
 			},
 			"PK": gn.DatabaseProperty{
 				Checkbox: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeCheckbox,
 			},
 			"Auto Generate": gn.DatabaseProperty{
 				Checkbox: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeCheckbox,
 			},
 			"Unique": gn.DatabaseProperty{
 				Checkbox: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeCheckbox,
 			},
 			"Null": gn.DatabaseProperty{
 				Checkbox: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeCheckbox,
 			},
 			"Comment": gn.DatabaseProperty{
 				RichText: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeRichText,
 			},
 			"Free Entry": gn.DatabaseProperty{
 				RichText: &gn.EmptyMetadata{},
+				Type:     gn.DBPropTypeRichText,
 			},
 		},
 	})
