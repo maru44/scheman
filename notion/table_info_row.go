@@ -14,7 +14,7 @@ type (
 		// select
 		DataType gn.DatabasePageProperty `json:"Data Type"`
 		// rich_text
-		Default gn.DatabasePageProperty `json:"Default"`
+		Default gn.DatabasePageProperty `json:"Default,omitempty"`
 		// checkbox
 		PK gn.DatabasePageProperty `json:"PK"`
 		// checkbox
@@ -24,18 +24,17 @@ type (
 		// checkbox
 		Nullable gn.DatabasePageProperty `json:"Null"`
 		// comment
-		Comment gn.DatabasePageProperty `json:"Comment"`
+		Comment gn.DatabasePageProperty `json:"Comment,omitempty"`
 		// rich_text
-		FreeText gn.DatabasePageProperty `json:"Free Entry"`
+		FreeText gn.DatabasePageProperty `json:"Free Entry,omitempty"`
 	}
 )
 
 func (n *Notion) createDefRow(ctx context.Context, tableID string, column definition.Column) error {
-	props := notionPropsFromDriversTable(column)
 	if _, err := n.cli.CreatePage(ctx, gn.CreatePageParams{
 		ParentType:             gn.ParentTypeDatabase,
 		ParentID:               tableID,
-		DatabasePageProperties: props.ToMap(),
+		DatabasePageProperties: notionDBPropsFromDriversTable(column),
 	}); err != nil {
 		return err
 	}
@@ -43,16 +42,15 @@ func (n *Notion) createDefRow(ctx context.Context, tableID string, column defini
 }
 
 func (n *Notion) updateDefRow(ctx context.Context, column definition.Column) error {
-	props := notionPropsFromDriversTable(column)
 	if _, err := n.cli.UpdatePage(ctx, column.RowID, gn.UpdatePageParams{
-		DatabasePageProperties: props.ToMap(),
+		DatabasePageProperties: notionDBPropsFromDriversTable(column),
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func notionPropsFromDriversTable(col definition.Column) *columnProps {
+func notionDBPropsFromDriversTable(col definition.Column) *gn.DatabasePageProperties {
 	props := &columnProps{
 		ColumnName: gn.DatabasePageProperty{
 			Title: []gn.RichText{
@@ -68,15 +66,6 @@ func notionPropsFromDriversTable(col definition.Column) *columnProps {
 				Name: col.DBType,
 			},
 		},
-		Default: gn.DatabasePageProperty{
-			RichText: []gn.RichText{
-				{
-					Text: &gn.Text{
-						Content: col.Default,
-					},
-				},
-			},
-		},
 		PK: gn.DatabasePageProperty{
 			Checkbox: gn.BoolPtr(col.PK),
 		},
@@ -89,7 +78,30 @@ func notionPropsFromDriversTable(col definition.Column) *columnProps {
 		Nullable: gn.DatabasePageProperty{
 			Checkbox: gn.BoolPtr(col.Nullable),
 		},
-		Comment: gn.DatabasePageProperty{
+	}
+
+	dbProps := &gn.DatabasePageProperties{
+		"Column Name":   props.ColumnName,
+		"Data Type":     props.DataType,
+		"PK":            props.PK,
+		"Unique":        props.Unique,
+		"Null":          props.Nullable,
+		"Auto Generate": props.AutoGen,
+	}
+
+	if col.Default != "" {
+		(*dbProps)["Default"] = gn.DatabasePageProperty{
+			RichText: []gn.RichText{
+				{
+					Text: &gn.Text{
+						Content: col.Default,
+					},
+				},
+			},
+		}
+	}
+	if col.Comment != "" {
+		(*dbProps)["Comment"] = gn.DatabasePageProperty{
 			RichText: []gn.RichText{
 				{
 					Text: &gn.Text{
@@ -97,8 +109,10 @@ func notionPropsFromDriversTable(col definition.Column) *columnProps {
 					},
 				},
 			},
-		},
-		FreeText: gn.DatabasePageProperty{
+		}
+	}
+	if col.FreeText != "" {
+		(*dbProps)["Free Entry"] = gn.DatabasePageProperty{
 			RichText: []gn.RichText{
 				{
 					Text: &gn.Text{
@@ -106,21 +120,8 @@ func notionPropsFromDriversTable(col definition.Column) *columnProps {
 					},
 				},
 			},
-		},
+		}
 	}
-	return props
-}
 
-func (c *columnProps) ToMap() *gn.DatabasePageProperties {
-	return &gn.DatabasePageProperties{
-		"Column Name":   c.ColumnName,
-		"Data Type":     c.DataType,
-		"Default":       c.Default,
-		"PK":            c.PK,
-		"Unique":        c.Unique,
-		"Null":          c.Nullable,
-		"Auto Generate": c.AutoGen,
-		"Comment":       c.Comment,
-		"Free Entry":    c.FreeText,
-	}
+	return dbProps
 }
