@@ -5,40 +5,26 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TYPE workday AS ENUM('monday', 'tuesday', 'wednesday', 'thursday', 'friday');
-CREATE TYPE faceyface AS ENUM('angry', 'hungry', 'bitter');
 
 CREATE TABLE event_zero (
-  id uuid DEFAULT gen_random_uuid() NOT NULL,
+  id  uuid DEFAULT gen_random_uuid() NOT NULL,
+  id2 serial NOT NULL,
+  day workday NOT NULL,
 
   PRIMARY KEY (id)
 );
 
-CREATE TABLE event_one (
-  id     serial PRIMARY KEY NOT NULL,
-  name   VARCHAR(255),
-  day    workday NOT NULL
+CREATE TABLE multi_pks (
+  id1 integer NOT NULL,
+  id2 integer NOT NULL,
+
+  PRIMARY KEY(id1, id2)
 );
 
-CREATE TABLE event_two (
-  id     serial PRIMARY KEY NOT NULL,
-  name   VARCHAR(255),
-  day    workday NOT NULL
-);
-
-CREATE TABLE event_three (
-  id     serial PRIMARY KEY NOT NULL,
-  name   VARCHAR(255),
-  day    workday NOT NULL,
-  face   faceyface NOT NULL,
-  thing  workday NULL,
-  stuff  faceyface NULL
-);
-
-CREATE TABLE facey (
-  id serial PRIMARY KEY NOT NULL,
-  name VARCHAR(255),
-  face faceyface NOT NULL
-);
+-- CREATE VIEW magic_views AS
+-- SELECT e.id event_id, m.id1 multi_id
+-- FROM event_zero e
+-- INNER JOIN multi_pks m ON e.id2 = m.id2;
 
 CREATE TABLE magic (
   id       serial PRIMARY KEY NOT NULL,
@@ -196,81 +182,6 @@ CREATE TABLE magic (
   nnn citext NOT NULL
 );
 
-create table owner (
-  id    serial primary key not null,
-  name  varchar(255) not null
-);
-
-create table cats (
-  id       serial primary key not null,
-  name     varchar(255) not null,
-  owner_id int references owner (id)
-);
-
-create table toys (
-  id    serial primary key not null,
-  name  varchar(255) not null
-);
-
-create table cat_toys (
-  cat_id int not null references cats (id),
-  toy_id int not null references toys (id),
-  primary key (cat_id, toy_id)
-);
-
-create table dog_toys (
-  dog_id int not null,
-  toy_id int not null,
-  primary key (dog_id, toy_id)
-);
-
-create table dragon_toys (
-  dragon_id uuid,
-  toy_id    uuid,
-  primary key (dragon_id, toy_id)
-);
-
-create table spider_toys (
-  spider_id uuid,
-  name      character varying,
-  primary key (spider_id)
-);
-
-create table pals (
-  pal character varying,
-  name character varying,
-  primary key (pal)
-);
-
-create table friend (
-  friend character varying,
-  name character varying,
-  primary key (friend)
-);
-
-create table bro (
-  bros character varying,
-  name character varying,
-  primary key (bros)
-);
-
-create table enemies (
-  enemies character varying,
-  name character varying,
-  primary key (enemies)
-);
-
-create table chocolate (
-  dog varchar(100) primary key
-);
-
-create table waffles (
-  cat varchar(100) primary key,
-  deci DECIMAL NOT NULL,
-  jb JSONB NOT NULL,
-  j JSON NOT NULL
-);
-
 create table fun_arrays (
   id serial,
   fun_one integer[] null,
@@ -288,169 +199,4 @@ create table fun_arrays (
   fun_thirteen json[] null,
   fun_fourteen json[] not null,
   primary key (id)
-);
-
-create table tigers (
-  id    bytea primary key,
-  name  bytea null
-);
-
-create table elephants (
-  id        bytea primary key,
-  name      bytea not null,
-  tiger_id  bytea null unique,
-  foreign key (tiger_id) references tigers (id)
-);
-
-create table wolves (
-  id        bytea primary key,
-  name      bytea not null,
-  tiger_id  bytea not null unique,
-  foreign key (tiger_id) references tigers (id)
-);
-
-create table ants (
-  id        bytea primary key,
-  name      bytea not null,
-  tiger_id  bytea not null,
-  foreign key (tiger_id) references tigers (id)
-);
-
-create table worms (
-  id        bytea primary key,
-  name      bytea not null,
-  tiger_id  bytea null,
-  foreign key (tiger_id) references tigers (id)
-);
-
-create table addresses (
-  id bytea primary key,
-  name bytea null
-);
-
-create table houses (
-  id bytea primary key,
-  name bytea not null,
-  address_id bytea not null unique,
-  foreign key (address_id) references addresses (id)
-);
-
-create table byte_pilots (
-  id   bytea primary key not null,
-  name character varying
-);
-
-create table byte_airports (
-  id   bytea primary key not null,
-  name character varying
-);
-
-create table byte_languages (
-  id   bytea primary key not null,
-  name character varying
-);
-
-create table byte_jets (
-  id              bytea primary key not null,
-  name            character varying,
-  byte_pilot_id   bytea unique,
-  byte_airport_id bytea,
-
-  foreign key (byte_pilot_id) references byte_pilots (id),
-  foreign key (byte_airport_id) references byte_airports (id)
-);
-
-create table byte_pilot_languages (
-  byte_pilot_id    bytea not null,
-  byte_language_id bytea not null,
-
-  primary key (byte_pilot_id, byte_language_id),
-  foreign key (byte_pilot_id) references byte_pilots (id),
-  foreign key (byte_language_id) references byte_languages (id)
-);
-
-create table cars (
-  id integer not null,
-  name text,
-  primary key (id)
-);
-
-create table car_cars (
-  car_id integer not null,
-  awesome_car_id integer not null,
-  relation text not null,
-  primary key (car_id, awesome_car_id),
-  foreign key (car_id) references cars(id),
-  foreign key (awesome_car_id) references cars(id)
-);
-
-create table trucks (
-  id integer not null,
-  parent_id integer,
-  name text,
-  primary key (id),
-  foreign key (parent_id) references trucks(id)
-);
-
-CREATE TABLE race (
-    id integer PRIMARY KEY NOT NULL,
-    race_date timestamp,
-    track text
-);
-
-CREATE TABLE race_results (
-    id integer PRIMARY KEY NOT NULL,
-    race_id integer,
-    name text,
-    foreign key (race_id) references race(id)
-);
-
-CREATE TABLE race_result_scratchings (
-    id integer PRIMARY KEY NOT NULL,
-    results_id integer NOT NULL,
-    name text NOT NULL,
-    foreign key (results_id) references race_results(id)
-);
-
-CREATE TABLE pilots (
-  id integer NOT NULL,
-  name text NOT NULL
-);
-
-ALTER TABLE pilots ADD CONSTRAINT pilot_pkey PRIMARY KEY (id);
-
-CREATE TABLE jets (
-  id integer NOT NULL,
-  pilot_id integer NOT NULL,
-  age integer NOT NULL,
-  name text NOT NULL,
-  color text NOT NULL
-);
-
-ALTER TABLE jets ADD CONSTRAINT jet_pkey PRIMARY KEY (id);
--- The following fkey remains poorly named to avoid regressions related to psql naming
-ALTER TABLE jets ADD CONSTRAINT pilots_fkey FOREIGN KEY (pilot_id) REFERENCES pilots(id);
-
-CREATE TABLE languages (
-  id integer NOT NULL,
-  language text NOT NULL
-);
-
-ALTER TABLE languages ADD CONSTRAINT language_pkey PRIMARY KEY (id);
-
--- Join table
-CREATE TABLE pilot_languages (
-  pilot_id integer NOT NULL,
-  language_id integer NOT NULL
-);
-
--- Composite primary key
-ALTER TABLE pilot_languages ADD CONSTRAINT pilot_language_pkey PRIMARY KEY (pilot_id, language_id);
--- The following fkey remains poorly named to avoid regressions related to psql naming
-ALTER TABLE pilot_languages ADD CONSTRAINT pilots_fkey FOREIGN KEY (pilot_id) REFERENCES pilots(id);
-ALTER TABLE pilot_languages ADD CONSTRAINT languages_fkey FOREIGN KEY (language_id) REFERENCES languages(id);
-
--- Previously the generated code had a naming clash when a table was called 'updates'
-CREATE TABLE updates (
-    id integer PRIMARY KEY NOT NULL
 );
