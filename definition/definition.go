@@ -9,16 +9,16 @@ type (
 		Upsert(context.Context) error
 	}
 
-	Platform string
+	Service string
 
 	CreateDefinitionHandler func() Definition
 )
 
 const (
-	PlatformNotion = "NOTION"
-	// PlatformSpreadSheat = "SpreadSheat"
+	ServiceNotion = Service("NOTION")
+	// ServiceSpreadSheat = "SpreadSheat"
 )
 
 var (
-	DefByPlatform = map[Platform]func() Definition{}
+	DefByService = map[Service]func() Definition{}
 )

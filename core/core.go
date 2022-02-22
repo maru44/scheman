@@ -15,7 +15,7 @@ import (
 type (
 	SchemanState struct {
 		*boilingcore.State
-		Defs map[definition.Platform]definition.Definition
+		Defs map[definition.Service]definition.Definition
 	}
 )
 
@@ -24,7 +24,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		State: &boilingcore.State{
 			Config: config,
 		},
-		Defs: map[definition.Platform]definition.Definition{},
+		Defs: map[definition.Service]definition.Definition{},
 	}
 
 	s.Driver = drivers.GetDriver(config.DriverName)
@@ -32,15 +32,28 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		return nil, errors.Wrap(err, "unable to initialize tables")
 	}
 
-	platform := viper.GetString("platform")
-	if platform == definition.PlatformNotion {
-		s.Defs[definition.PlatformNotion] = notion.NewNotion(
-			viper.GetString("notion-page-id"),
-			viper.GetString("notion-table-list-id"),
-			viper.GetString("notion-token"),
-			s.Tables,
-			config.DriverName,
-		)
+	services := viper.GetStringSlice("services")
+	for _, service := range services {
+		switch service {
+		case string(definition.ServiceNotion):
+			pageID := viper.GetString("notion-page-id")
+			token := viper.GetString("notion-token")
+			if pageID == "" {
+				return nil, errors.New("notion-page-id is not set")
+			}
+			if token == "" {
+				return nil, errors.New("notion-token is not set")
+			}
+			s.Defs[definition.ServiceNotion] = notion.NewNotion(
+				pageID,
+				viper.GetString("notion-table-list-id"),
+				token,
+				s.Tables,
+				config.DriverName,
+			)
+		default:
+			return nil, errors.New("Service have not been supported yet")
+		}
 	}
 
 	return s, nil
@@ -92,6 +105,6 @@ func (s *SchemanState) Run() error {
 	return nil
 }
 
-func (s *SchemanState) AddDef(key definition.Platform, def definition.Definition) {
+func (s *SchemanState) AddDef(key definition.Service, def definition.Definition) {
 	s.Defs[key] = def
 }
