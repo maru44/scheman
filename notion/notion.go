@@ -31,6 +31,11 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	listTableIDByTableName := map[string]string{}
+	for _, t := range ls {
+		listTableIDByTableName[t.TableName] = t.ID
+	}
+
 	tablesInNotionByName := map[string]definition.Table{}
 	tablesDefinedInNotion := make([]definition.Table, len(ls))
 	for i, l := range ls {
@@ -54,6 +59,13 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 		}
 		if !existsInConnection {
 			// drop def table in notion
+			if err := n.deleteRowOrTable(ctx, tn.PageID); err != nil {
+				return err
+			}
+			// drop from list table
+			if err := n.deleteRowOrTable(ctx, listTableIDByTableName[tn.Name]); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -71,8 +83,10 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 			for _, col := range tc.Columns {
 				columnNamesByConnection[col.Name]++
 				// If column name already exists in notion, update the row in notion.
-				if _, ok := columnInNotionByColumnName[col.Name]; ok {
+				if colNotion, ok := columnInNotionByColumnName[col.Name]; ok {
 					currentColumn := definition.ConvertCol(col, tc.PKey)
+					currentColumn.RowID = colNotion.RowID
+					currentColumn.FreeText = colNotion.FreeText
 					if err := n.updateDefRow(ctx, currentColumn); err != nil {
 						return err
 					}
@@ -84,7 +98,6 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 				if err := n.createDefRow(ctx, tn.PageID, c); err != nil {
 					return err
 				}
-				continue
 			}
 
 			// loop for notion columns
@@ -92,10 +105,9 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 			// delete the column in notion.
 			for columnNameN, col := range columnInNotionByColumnName {
 				if _, ok := columnNamesByConnection[columnNameN]; !ok {
-					if err := n.deleteDefTable(ctx, col.RowID); err != nil {
+					if err := n.deleteRowOrTable(ctx, col.RowID); err != nil {
 						return err
 					}
-					// @TODO then delete row of listTable
 				}
 			}
 			continue
@@ -123,4 +135,11 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 
 func (n *Notion) Upsert(ctx context.Context) {
 
+}
+
+func (n *Notion) deleteRowOrTable(ctx context.Context, id string) error {
+	if _, err := n.cli.DeleteBlock(ctx, id); err != nil {
+		return err
+	}
+	return nil
 }

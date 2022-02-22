@@ -11,6 +11,7 @@ import (
 
 type (
 	listTable struct {
+		ID        string
 		TableName string
 		PageID    string
 	}
@@ -106,6 +107,7 @@ func (n *Notion) getListTable(ctx context.Context) ([]*listTable, error) {
 			return nil, err
 		}
 		if l := props.toList(); l != nil {
+			l.ID = r.ID
 			ls = append(ls, l)
 		}
 	}

@@ -87,13 +87,6 @@ func (n *Notion) createDefTable(ctx context.Context, tableName string) (*string,
 	return &db.ID, nil
 }
 
-func (n *Notion) deleteDefTable(ctx context.Context, tableID string) error {
-	if _, err := n.cli.DeleteBlock(ctx, tableID); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*definition.Table, error) {
 	// request to notion api
 	hasNext := true
@@ -119,6 +112,7 @@ func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*d
 		Name:   tableName,
 	}
 
+	var cols []definition.Column
 	// convert notion response to []sqlboiler.drivers.table
 	for _, r := range res {
 		j, err := json.Marshal(r.Properties)
@@ -131,7 +125,7 @@ func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*d
 			return nil, err
 		}
 
-		if len(columnProps.ColumnName.Title) == 0 || len(columnProps.DataType.RichText) == 0 {
+		if len(columnProps.ColumnName.Title) == 0 || columnProps.DataType.Select.Name == "" {
 			continue
 		}
 
@@ -157,8 +151,9 @@ func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*d
 			col.FreeText = columnProps.FreeText.RichText[0].PlainText
 		}
 
-		table.Columns = append(table.Columns, col)
+		cols = append(cols, col)
 	}
+	table.Columns = cols
 
 	return table, nil
 }
