@@ -6,8 +6,7 @@ import (
 
 type (
 	Definition interface {
-		GetCurrent(context.Context) error
-		Upsert(context.Context)
+		Upsert(context.Context) error
 	}
 
 	Platform string

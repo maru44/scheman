@@ -83,7 +83,7 @@ func checkPKeys(tables []drivers.Table) error {
 func (s *SchemanState) Run() error {
 	ctx := context.Background()
 	for _, def := range s.Defs {
-		if err := def.GetCurrent(ctx); err != nil {
+		if err := def.Upsert(ctx); err != nil {
 			return err
 		}
 	}

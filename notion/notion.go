@@ -26,7 +26,7 @@ func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table) defi
 	}
 }
 
-func (n *Notion) GetCurrent(ctx context.Context) error {
+func (n *Notion) Upsert(ctx context.Context) error {
 	ls, err := n.getListTable(ctx)
 	if err != nil {
 		return err
@@ -131,10 +131,6 @@ func (n *Notion) GetCurrent(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (n *Notion) Upsert(ctx context.Context) {
-
 }
 
 func (n *Notion) deleteRowOrTable(ctx context.Context, id string) error {
