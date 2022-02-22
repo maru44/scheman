@@ -43,9 +43,9 @@ func main() {
 
 	rootCmd.PersistentFlags().StringP("platform", "", definition.PlatformNotion, "Platform table definition")
 
-	rootCmd.PersistentFlags().StringP("notion_page_id", "", "Null", "Page id for notion")
-	rootCmd.PersistentFlags().StringP("notion_token", "", "Null", "Notion integration token")
-	rootCmd.PersistentFlags().StringP("notion_table_list_id", "", "Null", "Table List to refer table name and its definition database id")
+	rootCmd.PersistentFlags().StringP("notion-page-id", "", "Null", "Page id for notion")
+	rootCmd.PersistentFlags().StringP("notion-token", "", "Null", "Notion integration token")
+	rootCmd.PersistentFlags().StringP("notion-table-list-id", "", "Null", "Table List to refer table name and its definition database id")
 
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

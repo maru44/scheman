@@ -35,9 +35,9 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	platform := viper.GetString("platform")
 	if platform == definition.PlatformNotion {
 		s.Defs[definition.PlatformNotion] = notion.NewNotion(
-			viper.GetString("notion_page_id"),
-			viper.GetString("notion_table_list_id"),
-			viper.GetString("notion_token"),
+			viper.GetString("notion-page-id"),
+			viper.GetString("notion-table-list-id"),
+			viper.GetString("notion-token"),
 			s.Tables,
 			config.DriverName,
 		)
