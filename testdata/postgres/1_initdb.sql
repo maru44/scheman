@@ -21,10 +21,10 @@ CREATE TABLE multi_pks (
   PRIMARY KEY(id1, id2)
 );
 
--- CREATE VIEW magic_views AS
--- SELECT e.id event_id, m.id1 multi_id
--- FROM event_zero e
--- INNER JOIN multi_pks m ON e.id2 = m.id2;
+CREATE VIEW magic_views AS
+SELECT e.id event_id, m.id1 multi_id
+FROM event_zero e
+INNER JOIN multi_pks m ON e.id2 = m.id2;
 
 CREATE TABLE magic (
   id       serial PRIMARY KEY NOT NULL,
