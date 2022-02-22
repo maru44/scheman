@@ -4,6 +4,7 @@ import (
 	"context"
 
 	gn "github.com/dstotijn/go-notion"
+	"github.com/fatih/color"
 	"github.com/maru44/scheman/definition"
 	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
@@ -14,23 +15,27 @@ type (
 		TableListDBID      string
 		cli                *gn.Client
 		TablesByConnection []drivers.Table
+		DriverName         string
 	}
 )
 
-func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table) definition.Definition {
+func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table, driverName string) definition.Definition {
 	return &Notion{
 		PageID:             pageID,
 		TableListDBID:      tableListDBID,
 		cli:                gn.NewClient(token),
 		TablesByConnection: tables,
+		DriverName:         driverName,
 	}
 }
 
 func (n *Notion) Upsert(ctx context.Context) error {
+	color.Green("Getting tables in Notion ...")
 	ls, err := n.getListTable(ctx)
 	if err != nil {
 		return err
 	}
+	color.Green("Success to get tables in Notion!")
 	listTableIDByTableName := map[string]string{}
 	for _, t := range ls {
 		listTableIDByTableName[t.TableName] = t.ID
@@ -70,6 +75,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 
 	for _, tc := range tablesByConnection {
+		color.Green("Writing Notion Table: %s", tc.Name)
 		if tn, ok := tablesInNotionByName[tc.Name]; ok {
 			columnNamesByConnection := map[string]int{}
 			columnInNotionByColumnName := map[string]definition.Column{}
@@ -84,7 +90,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 				columnNamesByConnection[col.Name]++
 				// If column name already exists in notion, update the row in notion.
 				if colNotion, ok := columnInNotionByColumnName[col.Name]; ok {
-					currentColumn := definition.ConvertCol(col, tc.PKey)
+					currentColumn := definition.ConvertCol(col, tc.PKey, n.DriverName)
 					currentColumn.RowID = colNotion.RowID
 					currentColumn.FreeText = colNotion.FreeText
 					if err := n.updateDefRow(ctx, currentColumn); err != nil {
@@ -94,7 +100,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 				}
 
 				// If column name does not exists in notion, insert row in notion.
-				c := definition.ConvertCol(col, tc.PKey)
+				c := definition.ConvertCol(col, tc.PKey, n.DriverName)
 				if err := n.createDefRow(ctx, tn.PageID, c); err != nil {
 					return err
 				}
@@ -119,8 +125,11 @@ func (n *Notion) Upsert(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		for _, col := range tc.Columns {
-			c := definition.ConvertCol(col, tc.PKey)
+		for i := range tc.Columns {
+			// for reverse
+			col := tc.Columns[len(tc.Columns)-1-i]
+
+			c := definition.ConvertCol(col, tc.PKey, n.DriverName)
 			if err := n.createDefRow(ctx, *dbID, c); err != nil {
 				return err
 			}

@@ -39,6 +39,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			viper.GetString("notion_table_list_id"),
 			viper.GetString("notion_token"),
 			s.Tables,
+			config.DriverName,
 		)
 	}
 
