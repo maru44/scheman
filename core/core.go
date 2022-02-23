@@ -53,7 +53,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			}
 			s.Defs[definition.ServiceNotion] = notion.NewNotion(
 				pageID,
-				viper.GetString("notion-table-list-id"),
+				viper.GetString("notion-table-index"),
 				token,
 				s.Tables,
 				config.DriverName,

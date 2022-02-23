@@ -5,6 +5,7 @@ import (
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/fatih/color"
+	"github.com/friendsofgo/errors"
 	"github.com/maru44/scheman/definition"
 	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
@@ -33,10 +34,22 @@ func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table, driv
 }
 
 func (n *Notion) Upsert(ctx context.Context) error {
+	newListTableID := ""
 	color.Green("Getting tables in Notion ...")
 	ls, err := n.getListTable(ctx)
 	if err != nil {
-		return err
+		// if invalid request url
+		// create list table
+		if errors.Is(err, gn.ErrInvalidRequestURL) {
+			id, err := n.createListTable(ctx)
+			if err != nil {
+				return err
+			}
+			n.TableListDBID = *id
+			newListTableID = *id
+		} else {
+			return err
+		}
 	}
 	color.Green("Success to get tables in Notion!")
 	listTableIDByTableName := map[string]string{}
@@ -140,6 +153,13 @@ func (n *Notion) Upsert(ctx context.Context) error {
 		if err := n.createListRow(ctx, tc.Name, *dbID); err != nil {
 			return err
 		}
+	}
+
+	if newListTableID != "" {
+		color.Yellow(
+			"We created new Table Index.\nYou have to set following config.\n\nkey: notion-table-index\nvalue: %s",
+			newListTableID,
+		)
 	}
 
 	return nil

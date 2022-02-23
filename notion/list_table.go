@@ -3,10 +3,9 @@ package notion
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 
 	gn "github.com/dstotijn/go-notion"
+	"github.com/friendsofgo/errors"
 )
 
 type (
@@ -79,13 +78,7 @@ func (n *Notion) getListTable(ctx context.Context) ([]*listTable, error) {
 			StartCursor: startCursor,
 		})
 		if err != nil {
-			if errors.Is(err, gn.ErrValidation) {
-				fmt.Println("validation")
-				// @TODO impl
-				// create database for list table
-			}
-			fmt.Println(err) // @TODO delete
-			return nil, err
+			return nil, errors.Wrap(err, "failed to query")
 		}
 		res = append(res, q.Results...)
 
@@ -112,4 +105,28 @@ func (n *Notion) getListTable(ctx context.Context) ([]*listTable, error) {
 		}
 	}
 	return ls, nil
+}
+
+func (n *Notion) createListTable(ctx context.Context) (*string, error) {
+	db, err := n.cli.CreateDatabase(ctx, gn.CreateDatabaseParams{
+		ParentPageID: n.PageID,
+		Title: []gn.RichText{
+			{
+				Text: &gn.Text{
+					Content: "Table Index",
+				},
+			},
+		},
+		Properties: gn.DatabaseProperties{
+			"Table Name": gn.DatabaseProperty{
+				Type:  gn.DBPropTypeTitle,
+				Title: &gn.EmptyMetadata{},
+			},
+			"Page ID": initialRichText,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &db.ID, nil
 }
