@@ -45,7 +45,7 @@ func main() {
 	rootCmd.PersistentFlags().StringP("notion-table-list-id", "", "", "Table List to refer table name and its definition database id")
 
 	rootCmd.PersistentFlags().StringArray("attr-ignore", []string{},
-		"List of attributes that should be ignored. ('Data Type', 'Default', 'PK', 'Auto Generate', 'Unique', 'Null', 'Comment', 'Free Entry')",
+		"List of attributes that should be ignored. ('Data Type', 'Default', 'PK', 'Auto Generate', 'Unique', 'Null', 'Enum', 'Comment', 'Free Entry')",
 	)
 
 	viper.BindPFlags(rootCmd.PersistentFlags())

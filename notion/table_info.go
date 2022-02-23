@@ -119,6 +119,14 @@ func (n *Notion) createDefTable(ctx context.Context, tableName string) (*string,
 	if _, ok := n.IgnoreAttributes["Free Entry"]; !ok {
 		params.Properties["Free Entry"] = initialRichText
 	}
+	if _, ok := n.IgnoreAttributes["Enum"]; !ok {
+		params.Properties["Enum"] = gn.DatabaseProperty{
+			Type: gn.DBPropTypeMultiSelect,
+			MultiSelect: &gn.SelectMetadata{
+				Options: []gn.SelectOptions{},
+			},
+		}
+	}
 	db, err := n.cli.CreateDatabase(ctx, params)
 	if err != nil {
 		return nil, err
@@ -194,6 +202,14 @@ func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*d
 		}
 		if _, ok := n.IgnoreAttributes["Comment"]; !ok && len(columnProps.Comment.RichText) != 0 {
 			col.Comment = columnProps.Comment.RichText[0].PlainText
+		}
+		if _, ok := n.IgnoreAttributes["Enum"]; !ok && len(columnProps.Enum.MultiSelect) != 0 {
+			ms := columnProps.Enum.MultiSelect
+			enums := make([]string, len(ms))
+			for i, e := range ms {
+				enums[i] = e.Name
+			}
+			col.Enum = enums
 		}
 		if _, ok := n.IgnoreAttributes["Free Entry"]; !ok && len(columnProps.FreeText.RichText) != 0 {
 			col.FreeText = columnProps.FreeText.RichText[0].PlainText

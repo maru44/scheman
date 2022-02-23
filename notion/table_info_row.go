@@ -2,6 +2,7 @@ package notion
 
 import (
 	"context"
+	"strings"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/maru44/scheman/definition"
@@ -23,8 +24,10 @@ type (
 		Unique gn.DatabasePageProperty `json:"Unique"`
 		// checkbox
 		Nullable gn.DatabasePageProperty `json:"Null"`
-		// comment
+		// rich_text
 		Comment gn.DatabasePageProperty `json:"Comment,omitempty"`
+		// rich_text
+		Enum gn.DatabasePageProperty `json:"Enum,omitempty"`
 		// rich_text
 		FreeText gn.DatabasePageProperty `json:"Free Entry,omitempty"`
 	}
@@ -122,6 +125,17 @@ func (n *Notion) notionDBPropsFromDriversTable(col definition.Column) *gn.Databa
 					},
 				},
 			},
+		}
+	}
+	if _, ok := n.IgnoreAttributes["Enum"]; !ok && len(col.Enum) != 0 {
+		opts := make([]gn.SelectOptions, len(col.Enum))
+		for i, e := range col.Enum {
+			opts[i] = gn.SelectOptions{
+				Name: strings.Trim(e, "'"),
+			}
+		}
+		(*dbProps)["Enum"] = gn.DatabasePageProperty{
+			MultiSelect: opts,
 		}
 	}
 
