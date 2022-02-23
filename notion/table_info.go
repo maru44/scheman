@@ -114,7 +114,7 @@ func (n *Notion) createDefTable(ctx context.Context, tableName string) (*string,
 		params.Properties["Null"] = initialCheckbox
 	}
 	if _, ok := n.IgnoreAttributes["Comment"]; !ok {
-		params.Properties["comment"] = initialRichText
+		params.Properties["Comment"] = initialRichText
 	}
 	if _, ok := n.IgnoreAttributes["Free Entry"]; !ok {
 		params.Properties["Free Entry"] = initialRichText

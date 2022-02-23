@@ -13,6 +13,7 @@ CREATE TABLE event_zero (
 
   PRIMARY KEY (id)
 );
+COMMENT ON COLUMN event_zero.day IS 'this is enum';
 
 CREATE TABLE multi_pks (
   id1 integer NOT NULL,
