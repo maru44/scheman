@@ -11,21 +11,24 @@ import (
 
 type (
 	Notion struct {
-		PageID             string
-		TableListDBID      string
-		cli                *gn.Client
+		PageID        string
+		TableListDBID string
+		cli           *gn.Client
+
 		TablesByConnection []drivers.Table
 		DriverName         string
+		IgnoreAttributes   map[string]int
 	}
 )
 
-func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table, driverName string) definition.Definition {
+func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int) definition.Definition {
 	return &Notion{
 		PageID:             pageID,
 		TableListDBID:      tableListDBID,
 		cli:                gn.NewClient(token),
 		TablesByConnection: tables,
 		DriverName:         driverName,
+		IgnoreAttributes:   ignoreAttrs,
 	}
 }
 

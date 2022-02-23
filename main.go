@@ -38,14 +38,15 @@ func main() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "c", "", "Filename of config file to override default lookup")
-	rootCmd.PersistentFlags().BoolP("add-enum-types", "", false, "Enable generation of types for enums")
-	rootCmd.PersistentFlags().StringP("enum-null-prefix", "", "Null", "Name prefix of nullable enum types")
 
 	rootCmd.PersistentFlags().StringArray("services", []string{string(definition.ServiceNotion)}, "Service table definition")
-
 	rootCmd.PersistentFlags().StringP("notion-page-id", "", "", "Page id for notion")
 	rootCmd.PersistentFlags().StringP("notion-token", "", "", "Notion integration token")
 	rootCmd.PersistentFlags().StringP("notion-table-list-id", "", "", "Table List to refer table name and its definition database id")
+
+	rootCmd.PersistentFlags().StringArray("attr-ignore", []string{},
+		"List of attributes that should be ignored. ('Data Type', 'Default', 'PK', 'Auto Generate', 'Unique', 'Null', 'Comment', 'Free Entry')",
+	)
 
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -68,15 +69,11 @@ func setState(cmd *cobra.Command, args []string) error {
 	}
 
 	config := &boilingcore.Config{
-		DriverName:     driverName,
-		AddEnumTypes:   viper.GetBool("add-enum-types"),
-		EnumNullPrefix: viper.GetString("enum-null-prefix"),
+		DriverName: driverName,
 	}
 	config.DriverConfig = map[string]interface{}{
-		"whitelist":        viper.GetStringSlice(driverName + ".whitelist"),
-		"blacklist":        viper.GetStringSlice(driverName + ".blacklist"),
-		"add-enum-types":   config.AddEnumTypes,
-		"enum-null-prefix": config.EnumNullPrefix,
+		"whitelist": viper.GetStringSlice(driverName + ".whitelist"),
+		"blacklist": viper.GetStringSlice(driverName + ".blacklist"),
 	}
 
 	keys := allKeys(driverName)
@@ -124,7 +121,7 @@ func initConfig() {
 	if len(flagConfigFile) != 0 {
 		viper.SetConfigFile(flagConfigFile)
 		if err := viper.ReadInConfig(); err != nil {
-			color.Red("Can't read config:", err)
+			color.Red("cannot read config:", err)
 			os.Exit(1)
 		}
 		return

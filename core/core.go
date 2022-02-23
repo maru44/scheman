@@ -15,7 +15,8 @@ import (
 type (
 	SchemanState struct {
 		*boilingcore.State
-		Defs map[definition.Service]definition.Definition
+		IgnoreAttributes []string
+		Defs             map[definition.Service]definition.Definition
 	}
 )
 
@@ -30,6 +31,12 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	s.Driver = drivers.GetDriver(config.DriverName)
 	if err := s.initDBInfo(config.DriverConfig); err != nil {
 		return nil, errors.Wrap(err, "unable to initialize tables")
+	}
+
+	ignoreAttrs := viper.GetStringSlice("attr-ignore")
+	ignores := make(map[string]int, len(ignoreAttrs))
+	for _, a := range ignoreAttrs {
+		ignores[a]++
 	}
 
 	services := viper.GetStringSlice("services")
@@ -50,6 +57,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				token,
 				s.Tables,
 				config.DriverName,
+				ignores,
 			)
 		default:
 			return nil, errors.New("Service have not been supported yet")
