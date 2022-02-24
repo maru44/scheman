@@ -47,14 +47,20 @@ func main() {
 		"List of attributes that should be ignored. ('Data Type', 'Default', 'PK', 'Auto Generate', 'Unique', 'Null', 'Enum', 'Comment', 'Free Entry')",
 	)
 
-	viper.BindPFlags(rootCmd.PersistentFlags())
+	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
+		exit(err)
+	}
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
 	if err := rootCmd.Execute(); err != nil {
-		color.Red("%v\n", err)
-		os.Exit(1)
+		exit(err)
 	}
+}
+
+func exit(err error) {
+	color.Red("%v", err)
+	os.Exit(1)
 }
 
 func setState(cmd *cobra.Command, args []string) error {

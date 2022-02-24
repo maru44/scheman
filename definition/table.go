@@ -47,22 +47,22 @@ func ConvertCol(c drivers.Column, tablePK *drivers.PrimaryKey, driverName string
 		switch dbType {
 		case "character varying":
 			dbType = "varchar"
-			def = strings.TrimRight(def, "::character varying")
+			def = strings.TrimSuffix(def, "::character varying")
 		case "character":
-			def = strings.TrimRight(def, "::bpchar")
+			def = strings.TrimSuffix(def, "::bpchar")
 		case "\"char\"":
 			dbType = "char"
-			def = strings.TrimRight(def, "::\"char\"")
+			def = strings.TrimSuffix(def, "::\"char\"")
 		case "interval":
-			def = strings.TrimRight(def, "::interval")
+			def = strings.TrimSuffix(def, "::interval")
 		case "date":
-			def = strings.TrimRight(def, "::date")
+			def = strings.TrimSuffix(def, "::date")
 		case "time":
-			def = strings.TrimRight(def, "::time")
+			def = strings.TrimSuffix(def, "::time")
 		case "timestamp with time zone":
-			def = strings.TrimRight(def, "::timestamp with time zone")
+			def = strings.TrimSuffix(def, "::timestamp with time zone")
 		case "timestamp without time zone":
-			def = strings.TrimRight(def, "::timestamp without time zone")
+			def = strings.TrimSuffix(def, "::timestamp without time zone")
 		}
 
 		if strings.HasPrefix(dbType, "enum.") {
