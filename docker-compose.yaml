@@ -11,17 +11,17 @@ services:
     volumes:
       - ./testdata/postgres:/docker-entrypoint-initdb.d
       - ./tmp/postgresql-data:/var/lib/postgres/data:z
-  # mysql:
-  #   container_name: scheman-mysql
-  #   platform: linux/x86_64
-  #   image: mysql:latest
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: password
-  #   ports:
-  #     - 3306:3306
-  #   volumes:
-  #     - ./testdata/mysql:/docker-entrypoint-initdb.d
-  #     - ./tmp/mysql-data:/var/lib/mysql/data:z
+  mysql:
+    container_name: scheman-mysql
+    platform: linux/x86_64
+    image: mariadb:10.5
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+    volumes:
+      - ./testdata/mysql:/docker-entrypoint-initdb.d
+      - ./tmp/mysql-data:/var/lib/mysql/data:z
       
   # @TODO
   # Microsoft 😡

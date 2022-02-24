@@ -1,5 +1,4 @@
 CREATE DATABASE scheman;
-
 USE scheman;
 
 CREATE TABLE event_one (

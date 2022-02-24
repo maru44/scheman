@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -63,6 +64,8 @@ func setState(cmd *cobra.Command, args []string) error {
 		return errors.New("must provide a driver name")
 	}
 
+	fmt.Println(exec.LookPath("sqlboiler-psql"))
+	fmt.Println(exec.LookPath("sqlboiler-mysql"))
 	driverName, _, err := drivers.RegisterBinaryFromCmdArg(args[0])
 	if err != nil {
 		return err
@@ -143,6 +146,7 @@ func initConfig() {
 	} else {
 		configPaths = append(configPaths, filepath.Join(homePath, ".config/scheman"))
 	}
+	fmt.Println(configPaths)
 
 	for _, p := range configPaths {
 		viper.AddConfigPath(p)
