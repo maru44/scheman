@@ -8,4 +8,4 @@ attr-ignore = ["Auto Generate"]
   pass    = "password"
   sslmode = "disable"
   schema  = "public"
-  blacklist = ["magic"]
+  blacklist = ["multi_pks"]
