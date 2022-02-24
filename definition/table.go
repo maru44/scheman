@@ -63,6 +63,10 @@ func ConvertCol(c drivers.Column, tablePK *drivers.PrimaryKey, driverName string
 			def = strings.TrimSuffix(def, "::timestamp with time zone")
 		case "timestamp without time zone":
 			def = strings.TrimSuffix(def, "::timestamp without time zone")
+		case "bytea":
+			def = strings.TrimSuffix(def, "::bytea")
+		case "uuid":
+			def = strings.TrimSuffix(def, "::uuid")
 		}
 
 		if strings.HasPrefix(dbType, "enum.") {
