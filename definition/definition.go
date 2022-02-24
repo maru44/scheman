@@ -10,8 +10,6 @@ type (
 	}
 
 	Service string
-
-	CreateDefinitionHandler func() Definition
 )
 
 const (

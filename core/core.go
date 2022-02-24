@@ -112,7 +112,3 @@ func (s *SchemanState) Run() error {
 
 	return nil
 }
-
-func (s *SchemanState) AddDef(key definition.Service, def definition.Definition) {
-	s.Defs[key] = def
-}
