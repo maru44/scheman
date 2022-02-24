@@ -71,6 +71,13 @@ func ConvertCol(c drivers.Column, tablePK *drivers.PrimaryKey, driverName string
 			dbType = "enum"
 		}
 	}
+	if driverName == "mysql" {
+		if strings.HasPrefix(dbType, "enum") {
+			r := regexp.MustCompile(`('[^']+')+`)
+			enums = r.FindAllString(dbType, -1)
+			dbType = "enum"
+		}
+	}
 
 	return Column{
 		Name:          c.Name,
