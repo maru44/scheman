@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -64,11 +63,9 @@ func setState(cmd *cobra.Command, args []string) error {
 		return errors.New("must provide a driver name")
 	}
 
-	fmt.Println(exec.LookPath("sqlboiler-psql"))
-	fmt.Println(exec.LookPath("sqlboiler-mysql"))
 	driverName, _, err := drivers.RegisterBinaryFromCmdArg(args[0])
 	if err != nil {
-		return err
+		return fmt.Errorf("Driver is not installed. Please run following command.\ngo install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-%sv@latest", args[0])
 	}
 
 	config := &boilingcore.Config{
@@ -146,7 +143,6 @@ func initConfig() {
 	} else {
 		configPaths = append(configPaths, filepath.Join(homePath, ".config/scheman"))
 	}
-	fmt.Println(configPaths)
 
 	for _, p := range configPaths {
 		viper.AddConfigPath(p)
