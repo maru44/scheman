@@ -5,16 +5,15 @@ import (
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/fatih/color"
-	"github.com/friendsofgo/errors"
 	"github.com/maru44/scheman/definition"
 	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 type (
 	Notion struct {
-		PageID        string
-		TableListDBID string
-		cli           *gn.Client
+		PageID       string
+		TableIndexID string
+		cli          *gn.Client
 
 		TablesByConnection []drivers.Table
 		DriverName         string
@@ -22,10 +21,10 @@ type (
 	}
 )
 
-func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int) definition.Definition {
+func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int) definition.Definition {
 	return &Notion{
 		PageID:             pageID,
-		TableListDBID:      tableListDBID,
+		TableIndexID:       tableIndexID,
 		cli:                gn.NewClient(token),
 		TablesByConnection: tables,
 		DriverName:         driverName,
@@ -34,22 +33,21 @@ func NewNotion(pageID, tableListDBID, token string, tables []drivers.Table, driv
 }
 
 func (n *Notion) Upsert(ctx context.Context) error {
-	newListTableID := ""
 	color.Green("Getting tables in Notion ...")
-	ls, err := n.getListTable(ctx)
-	if err != nil {
-		// if invalid request url
-		// create list table
-		if errors.Is(err, gn.ErrInvalidRequestURL) {
-			id, err := n.createListTable(ctx)
-			if err != nil {
-				return err
-			}
-			n.TableListDBID = *id
-			newListTableID = *id
-		} else {
+
+	newListTableID := ""
+	if n.TableIndexID == "" {
+		id, err := n.createListTable(ctx)
+		if err != nil {
 			return err
 		}
+		n.TableIndexID = *id
+		newListTableID = *id
+	}
+
+	ls, err := n.getListTable(ctx)
+	if err != nil {
+		return err
 	}
 	color.Green("Success to get tables in Notion!")
 	listTableIDByTableName := map[string]string{}
@@ -157,7 +155,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 
 	if newListTableID != "" {
 		color.Yellow(
-			"We created new Table Index.\nYou have to set following config.\n\nkey: notion-table-index\nvalue: %s",
+			"We created new Table Index Database.\nYou have to set following config.\n\nkey: notion-table-index\nvalue: %s",
 			newListTableID,
 		)
 	}

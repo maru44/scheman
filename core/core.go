@@ -60,7 +60,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				ignores,
 			)
 		default:
-			return nil, errors.New("Service have not been supported yet")
+			return nil, errors.Errorf("The service have not been supported yet: %s", service)
 		}
 	}
 

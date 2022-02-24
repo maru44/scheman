@@ -42,7 +42,7 @@ func (l *listTableResponse) toList() *listTable {
 func (n *Notion) createListRow(ctx context.Context, tableName, tableID string) error {
 	if _, err := n.cli.CreatePage(ctx, gn.CreatePageParams{
 		ParentType: gn.ParentTypeDatabase,
-		ParentID:   n.TableListDBID,
+		ParentID:   n.TableIndexID,
 		DatabasePageProperties: &gn.DatabasePageProperties{
 			"Table Name": gn.DatabasePageProperty{
 				Title: []gn.RichText{
@@ -74,7 +74,7 @@ func (n *Notion) getListTable(ctx context.Context) ([]*listTable, error) {
 	startCursor := ""
 	var res []gn.Page
 	for hasNext {
-		q, err := n.cli.QueryDatabase(ctx, n.TableListDBID, &gn.DatabaseQuery{
+		q, err := n.cli.QueryDatabase(ctx, n.TableIndexID, &gn.DatabaseQuery{
 			StartCursor: startCursor,
 		})
 		if err != nil {

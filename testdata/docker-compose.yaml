@@ -9,7 +9,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./testdata/postgres:/docker-entrypoint-initdb.d
+      - ./postgres:/docker-entrypoint-initdb.d
       - ./tmp/postgresql-data:/var/lib/postgres/data:z
   mysql:
     container_name: scheman-mysql
@@ -20,7 +20,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./testdata/mysql:/docker-entrypoint-initdb.d
+      - ./mysql:/docker-entrypoint-initdb.d
       - ./tmp/mysql-data:/var/lib/mysql/data:z
       
   # @TODO

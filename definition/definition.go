@@ -16,9 +16,4 @@ type (
 
 const (
 	ServiceNotion = Service("NOTION")
-	// ServiceSpreadSheat = "SpreadSheat"
-)
-
-var (
-	DefByService = map[Service]func() Definition{}
 )

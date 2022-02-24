@@ -1,0 +1,11 @@
+attr-ignore = ["Auto Generate"]
+
+[psql]
+  dbname  = "scheman"
+  host    = "localhost"
+  port    = 5432
+  user    = "root"
+  pass    = "password"
+  sslmode = "disable"
+  schema  = "public"
+  blacklist = ["magic"]

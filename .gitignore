@@ -18,7 +18,6 @@
 #
 #
 
-*.toml
 .envrc
 .tmp/**
 .vscode/**
