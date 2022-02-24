@@ -16,8 +16,14 @@ type (
 	SchemanState struct {
 		*boilingcore.State
 		IgnoreAttributes []string
-		Defs             map[definition.Service]definition.Definition
+		Defs             map[Service]definition.Definition
 	}
+
+	Service string
+)
+
+const (
+	ServiceNotion = Service("NOTION")
 )
 
 func New(config *boilingcore.Config) (*SchemanState, error) {
@@ -25,7 +31,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		State: &boilingcore.State{
 			Config: config,
 		},
-		Defs: map[definition.Service]definition.Definition{},
+		Defs: map[Service]definition.Definition{},
 	}
 
 	s.Driver = drivers.GetDriver(config.DriverName)
@@ -42,7 +48,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
 		switch service {
-		case string(definition.ServiceNotion):
+		case string(ServiceNotion):
 			pageID := viper.GetString("notion-page-id")
 			token := viper.GetString("notion-token")
 			if pageID == "" {
@@ -51,7 +57,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			if token == "" {
 				return nil, errors.New("notion-token is not set")
 			}
-			s.Defs[definition.ServiceNotion] = notion.NewNotion(
+			s.Defs[ServiceNotion] = notion.NewNotion(
 				pageID,
 				viper.GetString("notion-table-index"),
 				token,

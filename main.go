@@ -9,7 +9,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/maru44/scheman/core"
-	"github.com/maru44/scheman/definition"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/v4/boilingcore"
@@ -39,7 +38,7 @@ func main() {
 
 	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "c", "", "Filename of config file to override default lookup")
 
-	rootCmd.PersistentFlags().StringArray("services", []string{string(definition.ServiceNotion)}, "Service table definition")
+	rootCmd.PersistentFlags().StringArray("services", []string{string(core.ServiceNotion)}, "Service table definition")
 	rootCmd.PersistentFlags().StringP("notion-page-id", "", "", "Page id for notion")
 	rootCmd.PersistentFlags().StringP("notion-token", "", "", "Notion integration token")
 	rootCmd.PersistentFlags().StringP("notion-table-index", "", "", "Table List to refer table name and its definition database id")
