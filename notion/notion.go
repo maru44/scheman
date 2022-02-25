@@ -73,7 +73,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 		// judge if the table exists in connection.
 		existsInConnection := false
 		for _, tc := range tablesByConnection {
-			if tc.Name == tn.Name {
+			if tableNameForNotion(tc) == tn.Name {
 				existsInConnection = true
 				break
 			}
@@ -106,8 +106,9 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 
 	for _, tc := range tablesByConnection {
-		color.Green("Writing Notion Table: %s", tc.Name)
-		if tn, ok := tablesInNotionByName[tc.Name]; ok {
+		tableNameForNotion := tableNameForNotion(tc)
+		color.Green("Writing Notion Table: %s", tableNameForNotion)
+		if tn, ok := tablesInNotionByName[tableNameForNotion]; ok {
 			columnNamesByConnection := map[string]int{}
 			columnInNotionByColumnName := map[string]definition.Column{}
 
@@ -152,7 +153,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 
 		// If table does not exists,
 		// insert table and insert columns as row.
-		dbID, err := n.createDefTable(ctx, tc.Name)
+		dbID, err := n.createDefTable(ctx, tableNameForNotion)
 		if err != nil {
 			return err
 		}
@@ -165,7 +166,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 				return err
 			}
 		}
-		if err := n.createListRow(ctx, tc.Name, *dbID); err != nil {
+		if err := n.createListRow(ctx, tableNameForNotion, *dbID); err != nil {
 			return err
 		}
 	}

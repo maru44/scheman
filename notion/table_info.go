@@ -6,6 +6,7 @@ import (
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/maru44/scheman/definition"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 var (
@@ -91,13 +92,13 @@ var (
 	}
 )
 
-func (n *Notion) createDefTable(ctx context.Context, tableName string) (*string, error) {
+func (n *Notion) createDefTable(ctx context.Context, tableNameForNotion string) (*string, error) {
 	params := gn.CreateDatabaseParams{
 		ParentPageID: n.PageID,
 		Title: []gn.RichText{
 			{
 				Text: &gn.Text{
-					Content: tableName,
+					Content: tableNameForNotion,
 				},
 			},
 		},
@@ -233,4 +234,11 @@ func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*d
 	table.Columns = cols
 
 	return table, nil
+}
+
+func tableNameForNotion(table drivers.Table) string {
+	if table.IsView {
+		return table.Name + " (View)"
+	}
+	return table.Name
 }
