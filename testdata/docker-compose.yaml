@@ -10,7 +10,6 @@ services:
       - 5432:5432
     volumes:
       - ./postgres:/docker-entrypoint-initdb.d
-      - ./tmp/postgresql-data:/var/lib/postgres/data:z
   mysql:
     container_name: scheman-mysql
     platform: linux/x86_64
@@ -21,13 +20,14 @@ services:
       - 3306:3306
     volumes:
       - ./mysql:/docker-entrypoint-initdb.d
-      - ./tmp/mysql-data:/var/lib/mysql/data:z
-      
-  # @TODO
-  # Microsoft 😡
-
-  # mssql:
-  #   container_name: mssql
-  #   image: :2019-latest
-  #   ports:
-  #     - 1433:1433
+  mssql:
+    container_name: scheman-mssql
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_USER: SA
+      MSSQL_SA_PASSWORD: paSsword!001
+    ports:
+      - 1433:1433
+    volumes:
+      - ./mssql:/docker-entrypoint-initdb.d

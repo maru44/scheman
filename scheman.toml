@@ -9,3 +9,10 @@ attr-ignore = ["Auto Generate"]
   sslmode = "disable"
   schema  = "public"
   blacklist = ["multi_pks"]
+
+[mssql]
+  dbname = "scheman"
+  host = "localhost"
+  port = 1433
+  user = "SA"
+  pass = "paSsword!001"
