@@ -68,6 +68,18 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	tablesByConnection := n.TablesByConnection
 
 	for _, tn := range tablesDefinedInNotion {
+		updateAttrProps, err := n.updateAttrProps(ctx, tn.PageID)
+		if err != nil {
+			return err
+		}
+		if len(updateAttrProps) != 0 {
+			if _, err := n.cli.UpdateDatabase(ctx, tn.PageID, gn.UpdateDatabaseParams{
+				Properties: updateAttrProps,
+			}); err != nil {
+				return err
+			}
+		}
+
 		// judge if the table exists in connection.
 		existsInConnection := false
 		for _, tc := range tablesByConnection {

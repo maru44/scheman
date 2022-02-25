@@ -20,14 +20,14 @@ services:
       - 3306:3306
     volumes:
       - ./mysql:/docker-entrypoint-initdb.d
-  mssql:
-    container_name: scheman-mssql
-    image: mcr.microsoft.com/azure-sql-edge:latest
-    environment:
-      ACCEPT_EULA: 'Y'
-      MSSQL_USER: SA
-      MSSQL_SA_PASSWORD: paSsword!001
-    ports:
-      - 1433:1433
-    volumes:
-      - ./mssql:/docker-entrypoint-initdb.d
+  # mssql:
+  #   container_name: scheman-mssql
+  #   image: mcr.microsoft.com/azure-sql-edge:latest
+  #   environment:
+  #     ACCEPT_EULA: 'Y'
+  #     MSSQL_USER: SA
+  #     MSSQL_SA_PASSWORD: paSsword!001
+  #   ports:
+  #     - 1433:1433
+  #   volumes:
+  #     - ./mssql:/docker-entrypoint-initdb.d

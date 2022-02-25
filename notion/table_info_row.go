@@ -141,3 +141,46 @@ func (n *Notion) notionDBPropsFromDriversTable(col definition.Column) *gn.Databa
 
 	return dbProps
 }
+
+func (n *Notion) updateAttrProps(ctx context.Context, tableID string) (map[string]*gn.DatabaseProperty, error) {
+	db, err := n.cli.FindDatabaseByID(ctx, tableID)
+	if err != nil {
+		return nil, err
+	}
+	notionAttrs := map[string]int{}
+	for _, a := range allAttrs {
+		if _, ok := db.Properties[a]; ok {
+			notionAttrs[a]++
+		}
+	}
+
+	props := map[string]*gn.DatabaseProperty{}
+	for _, a := range allAttrs {
+		if _, ok := n.IgnoreAttributes[a]; ok {
+			if _, ok := notionAttrs[a]; ok {
+				props[a] = nil
+				continue
+			}
+			continue
+		}
+
+		if _, ok := notionAttrs[a]; !ok {
+			switch a {
+			case "Data Type":
+				props[a] = &initialDataTypeProperty
+			case "Default", "Comment", "Free Entry":
+				props[a] = &initialRichText
+			case "Enum":
+				props[a] = &gn.DatabaseProperty{
+					Type: gn.DBPropTypeMultiSelect,
+					MultiSelect: &gn.SelectMetadata{
+						Options: []gn.SelectOptions{},
+					},
+				}
+			case "PK", "Auto Generate", "Unique", "Null":
+				props[a] = &initialCheckbox
+			}
+		}
+	}
+	return props, nil
+}

@@ -1,4 +1,4 @@
-attr-ignore = ["Auto Generate"]
+attr-ignore = ["Auto Generate",]
 
 [psql]
   dbname  = "scheman"
