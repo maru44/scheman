@@ -43,6 +43,7 @@ func main() {
 	rootCmd.PersistentFlags().StringP("notion-token", "", "", "Notion integration token")
 	rootCmd.PersistentFlags().StringP("notion-table-index", "", "", "Table List to refer table name and its definition database id")
 
+	rootCmd.PersistentFlags().BoolP("disable-views", "", false, "If true, views are ignored and only tables are written")
 	rootCmd.PersistentFlags().StringArray("attr-ignore", []string{},
 		"List of attributes that should be ignored. ('Data Type', 'Default', 'PK', 'Auto Generate', 'Unique', 'Null', 'Enum', 'Comment', 'Free Entry')",
 	)

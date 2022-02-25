@@ -236,8 +236,11 @@ func (n *Notion) getDefTable(ctx context.Context, tableID, tableName string) (*d
 	return table, nil
 }
 
-func tableNameForNotion(table drivers.Table) string {
+func (n *Notion) tableNameForNotion(table drivers.Table) string {
 	if table.IsView {
+		if n.IsIgnoreView {
+			return ""
+		}
 		return table.Name + " (View)"
 	}
 	return table.Name

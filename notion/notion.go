@@ -18,10 +18,11 @@ type (
 		TablesByConnection []drivers.Table
 		DriverName         string
 		IgnoreAttributes   map[string]int
+		IsIgnoreView       bool
 	}
 )
 
-func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int) definition.Definition {
+func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
 	return &Notion{
 		PageID:             pageID,
 		TableIndexID:       tableIndexID,
@@ -29,6 +30,7 @@ func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, drive
 		TablesByConnection: tables,
 		DriverName:         driverName,
 		IgnoreAttributes:   ignoreAttrs,
+		IsIgnoreView:       isIgnoreView,
 	}
 }
 
@@ -73,7 +75,7 @@ func (n *Notion) Upsert(ctx context.Context) error {
 		// judge if the table exists in connection.
 		existsInConnection := false
 		for _, tc := range tablesByConnection {
-			if tableNameForNotion(tc) == tn.Name {
+			if n.tableNameForNotion(tc) == tn.Name {
 				existsInConnection = true
 				break
 			}
@@ -106,7 +108,11 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 
 	for _, tc := range tablesByConnection {
-		tableNameForNotion := tableNameForNotion(tc)
+		tableNameForNotion := n.tableNameForNotion(tc)
+		if tableNameForNotion == "" {
+			continue
+		}
+
 		color.Green("Writing Notion Table: %s", tableNameForNotion)
 		if tn, ok := tablesInNotionByName[tableNameForNotion]; ok {
 			columnNamesByConnection := map[string]int{}

@@ -44,6 +44,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	for _, a := range ignoreAttrs {
 		ignores[a]++
 	}
+	isIgnoreView := viper.GetBool("disable-views")
 
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
@@ -64,6 +65,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				s.Tables,
 				config.DriverName,
 				ignores,
+				isIgnoreView,
 			)
 		default:
 			return nil, errors.Errorf("The service have not been supported yet: %s", service)
