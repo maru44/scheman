@@ -1,4 +1,4 @@
-attr-ignore = ["Auto Generate",]
+attr-ignore = ["Auto Generate", "Comment"]
 
 [psql]
   dbname  = "scheman"
@@ -8,7 +8,7 @@ attr-ignore = ["Auto Generate",]
   pass    = "password"
   sslmode = "disable"
   schema  = "public"
-  blacklist = ["multi_pks"]
+  blacklist = ["multi_pks", "magic"]
 
 [mssql]
   dbname = "scheman"

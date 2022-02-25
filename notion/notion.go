@@ -67,19 +67,9 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 	tablesByConnection := n.TablesByConnection
 
+	// for delete notion definition table
+	// and update table attributes
 	for _, tn := range tablesDefinedInNotion {
-		updateAttrProps, err := n.updateAttrProps(ctx, tn.PageID)
-		if err != nil {
-			return err
-		}
-		if len(updateAttrProps) != 0 {
-			if _, err := n.cli.UpdateDatabase(ctx, tn.PageID, gn.UpdateDatabaseParams{
-				Properties: updateAttrProps,
-			}); err != nil {
-				return err
-			}
-		}
-
 		// judge if the table exists in connection.
 		existsInConnection := false
 		for _, tc := range tablesByConnection {
@@ -95,6 +85,21 @@ func (n *Notion) Upsert(ctx context.Context) error {
 			}
 			// drop from list table
 			if err := n.deleteRowOrTable(ctx, listTableIDByTableName[tn.Name]); err != nil {
+				return err
+			}
+			continue
+		}
+
+		// if exists in connection
+		// update attributes if required
+		updateAttrProps, err := n.updateAttrProps(ctx, tn.PageID)
+		if err != nil {
+			return err
+		}
+		if len(updateAttrProps) != 0 {
+			if _, err := n.cli.UpdateDatabase(ctx, tn.PageID, gn.UpdateDatabaseParams{
+				Properties: updateAttrProps,
+			}); err != nil {
 				return err
 			}
 		}
