@@ -1,6 +1,6 @@
 ---
 name: bug
-about: 🪲
+about: Bug reports
 title: ""
 labels: "-type: bug"
 ---
