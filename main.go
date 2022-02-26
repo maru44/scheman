@@ -16,16 +16,30 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/importers"
 )
 
+const (
+	version          = "1.0.0"
+	sqlBoilerVersion = "4.8.6"
+)
+
 var (
 	flagConfigFile string
 	state          *core.SchemanState
 )
 
 func main() {
+	for _, arg := range os.Args {
+		if arg == "--version" {
+			fmt.Println("SQLBoiler v" + version)
+			return
+		}
+	}
+
 	var rootCmd = &cobra.Command{
-		Use:           "scheman [flags] <driver>",
-		Short:         "Scheman generates schema table to notion, etc", // @TODO
-		Long:          "Scheman generates a schema table to notion",    // @TODO
+		Use:   "scheman [flags] <driver>",
+		Short: "Scheman will write database schema in notion. I'm going to add output destination like spreadsheets.",
+		Long: "Scheman will write database schema in notion. I'm going to add output destination like spreadsheets.\n" +
+			"Complete documentation is available at https://github.com/maru44/scheman\n" +
+			"This package depend on https://github.com/volatiletech/sqlboiler. Thank you.",
 		Example:       `scheman psql`,
 		PreRunE:       setState,
 		RunE:          run,
@@ -71,7 +85,14 @@ func setState(cmd *cobra.Command, args []string) error {
 
 	driverName, _, err := drivers.RegisterBinaryFromCmdArg(args[0])
 	if err != nil {
-		return fmt.Errorf("Driver is not installed. Please run following command.\ngo install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-%sv@latest", args[0])
+		switch args[0] {
+		case "psql", "mysql", "mssql", "sqlite3":
+			return fmt.Errorf("Driver is not installed. Please run following command.\ngo install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-%s@v%s", args[0], sqlBoilerVersion)
+		case "crdb":
+			return fmt.Errorf("Driver is not installed. Please run following command.\ngo install github.com/glerchundi/sqlboiler-crdb")
+		default:
+			return fmt.Errorf("Driver that name is %s is not supported.", args[0])
+		}
 	}
 
 	config := &boilingcore.Config{
