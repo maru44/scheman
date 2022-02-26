@@ -38,7 +38,8 @@ go install github.com/maru44/scheman@v1.0.0
 **_example for PostgreSQL - Notion)_**
 
 ```
-go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 && scheman psql --notion-token ${NOTION_TOKEN} --notion-page-id ${PSQL_NOTION_PAGE_ID}
+go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 \
+ && scheman psql --notion-token ${NOTION_TOKEN} --notion-page-id ${PSQL_NOTION_PAGE_ID}
 ```
 
 #### Generic config options
