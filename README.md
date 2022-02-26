@@ -2,6 +2,8 @@
 
 Scheman is a tool to write database schema from connected database.
 
+![](https://user-images.githubusercontent.com/46714011/155822065-f0f9f785-b2b1-4abd-b98b-052496dff169.png)
+
 #### Supported Databases
 
 | Database     | Test Confirmed |
