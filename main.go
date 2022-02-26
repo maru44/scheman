@@ -39,7 +39,7 @@ func main() {
 		Short: "Scheman will write database schema in notion. I'm going to add output destination like spreadsheets.",
 		Long: "Scheman will write database schema in notion. I'm going to add output destination like spreadsheets.\n" +
 			"Complete documentation is available at https://github.com/maru44/scheman\n" +
-			"This package depend on https://github.com/volatiletech/sqlboiler. Thank you.",
+			"This package depends on https://github.com/volatiletech/sqlboiler. Thank you.",
 		Example:       `scheman psql`,
 		PreRunE:       setState,
 		RunE:          run,
