@@ -48,11 +48,6 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	}
 	isIgnoreView := viper.GetBool("disable-views")
 
-	mermaidOutputs := viper.GetStringSlice("mermaid-outputs")
-	if len(mermaidOutputs) != 0 {
-		s.Mermaid = s.genMermaid()
-	}
-
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
 		switch service {
@@ -65,17 +60,11 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			if token == "" {
 				return nil, errors.New("notion-token is not set")
 			}
-			var mermaid string
-			for _, o := range mermaidOutputs {
-				if o == string(ServiceNotion) {
-					mermaid = s.Mermaid
-				}
-			}
 			s.Defs[ServiceNotion] = notion.NewNotion(
 				pageID,
 				viper.GetString("notion-table-index"),
+				viper.GetString("notion-mermaid-id"),
 				token,
-				mermaid,
 				s.Tables,
 				config.DriverName,
 				ignores,
@@ -83,6 +72,38 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			)
 		default:
 			return nil, errors.Errorf("The service have not been supported yet: %s", service)
+		}
+	}
+
+	mermaidOutputs := viper.GetStringSlice("mermaid-outputs")
+	if len(mermaidOutputs) != 0 {
+		s.Mermaid = s.genMermaid()
+	}
+	for _, m := range mermaidOutputs {
+		if d, ok := s.Defs[Service(m)]; ok {
+			d.SetMermaid(m)
+		} else {
+			switch m {
+			case string(ServiceNotion):
+				pageID := viper.GetString("notion-page-id")
+				token := viper.GetString("notion-token")
+				if pageID == "" {
+					return nil, errors.New("notion-page-id is not set")
+				}
+				if token == "" {
+					return nil, errors.New("notion-token is not set")
+				}
+				s.Defs[ServiceNotion] = notion.NewNotion(
+					pageID,
+					viper.GetString("notion-table-index"),
+					viper.GetString("notion-mermaid-id"),
+					token,
+					nil,
+					config.DriverName,
+					ignores,
+					isIgnoreView,
+				)
+			}
 		}
 	}
 
