@@ -2,6 +2,7 @@ package notion
 
 import (
 	"context"
+	"fmt"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/fatih/color"
@@ -19,10 +20,11 @@ type (
 		DriverName         string
 		IgnoreAttributes   map[string]int
 		IsIgnoreView       bool
+		RawMermaid         string
 	}
 )
 
-func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
+func NewNotion(pageID, tableIndexID, token, rawMermaid string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
 	return &Notion{
 		PageID:             pageID,
 		TableIndexID:       tableIndexID,
@@ -31,6 +33,7 @@ func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, drive
 		DriverName:         driverName,
 		IgnoreAttributes:   ignoreAttrs,
 		IsIgnoreView:       isIgnoreView,
+		RawMermaid:         rawMermaid,
 	}
 }
 
@@ -185,6 +188,48 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (n *Notion) Mermaid(ctx context.Context) error {
+	if n.RawMermaid == "" {
+		return nil
+	}
+
+	fmt.Println(n.RawMermaid)
+
+	typ := "mermaid"
+	p, err := n.cli.CreatePage(ctx, gn.CreatePageParams{
+		ParentType: gn.ParentTypePage,
+		ParentID:   n.PageID,
+		Title: []gn.RichText{
+			{
+				Text: &gn.Text{
+					Content: "ERD",
+				},
+			},
+		},
+		Children: []gn.Block{
+			{
+				Type: gn.BlockTypeCode,
+				Code: &gn.Code{
+					Language: &typ,
+					RichTextBlock: gn.RichTextBlock{
+						Text: []gn.RichText{
+							{
+								Text: &gn.Text{
+									Content: n.RawMermaid,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	})
+	// @TODO output pID
+	fmt.Println(p)
+
+	return err
 }
 
 func (n *Notion) deleteRowOrTable(ctx context.Context, id string) error {

@@ -8,7 +8,7 @@ attr-ignore = ["Auto Generate", "Comment"]
   pass    = "password"
   sslmode = "disable"
   schema  = "public"
-  blacklist = ["multi_pks", ]
+  blacklist = ["fun_arrays", "magic", "magic_test"]
 
 [mssql]
   dbname = "scheman"

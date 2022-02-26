@@ -7,5 +7,6 @@ import (
 type (
 	Definition interface {
 		Upsert(context.Context) error
+		Mermaid(context.Context) error
 	}
 )

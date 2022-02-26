@@ -52,7 +52,8 @@ func main() {
 
 	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "c", "", "Filename of config file to override default lookup")
 
-	rootCmd.PersistentFlags().StringArray("services", []string{string(core.ServiceNotion)}, "Service table definition")
+	rootCmd.PersistentFlags().StringArray("services", []string{string(core.ServiceNotion)}, "Services to be written table definition")
+	rootCmd.PersistentFlags().StringArray("mermaid-outputs", []string{string(core.ServiceNotion)}, "Services to be written ERD (mermaid format)")
 	rootCmd.PersistentFlags().StringP("notion-page-id", "", "", "Page id for notion")
 	rootCmd.PersistentFlags().StringP("notion-token", "", "", "Notion integration token")
 	rootCmd.PersistentFlags().StringP("notion-table-index", "", "", "Table List to refer table name and its definition database id")
