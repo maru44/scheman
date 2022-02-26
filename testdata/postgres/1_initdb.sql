@@ -22,6 +22,35 @@ CREATE TABLE multi_pks (
   PRIMARY KEY(id1, id2)
 );
 
+CREATE TABLE rels (
+  id uuid UNIQUE DEFAULT gen_random_uuid() NOT NULL,
+  event_zero_id uuid NULL REFERENCES event_zero(id) ON DELETE SET NULL,
+
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE rel2 (
+  id uuid DEFAULT gen_random_uuid() NOT NULL,
+
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE rel3 (
+  id uuid DEFAULT gen_random_uuid() NOT NULL,
+  username VARCHAR(255) UNIQUE NOT NULL,
+
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE rel_rels (
+  id uuid DEFAULT gen_random_uuid() NOT NULL,
+  rel_id uuid NOT NULL REFERENCES rels(id) ON DELETE CASCADE,
+  rel2_id uuid DEFAULT NULl REFERENCES rel2(id) ON DELETE SET NULL,
+  rel3_username VARCHAR(255) UNIQUE DEFAULT NULL REFERENCES rel3(username) ON DELETE SET NULL,
+
+  PRIMARY kEY (id)
+);
+
 CREATE VIEW magic_views AS
 SELECT e.id event_id, m.id1 multi_id
 FROM event_zero e

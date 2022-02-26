@@ -2,39 +2,46 @@ package notion
 
 import (
 	"context"
+	"errors"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/fatih/color"
 	"github.com/maru44/scheman/definition"
-	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 type (
 	Notion struct {
+		*definition.CommonInfo
 		PageID       string
 		TableIndexID string
+		MermaidERDID string
 		cli          *gn.Client
-
-		TablesByConnection []drivers.Table
-		DriverName         string
-		IgnoreAttributes   map[string]int
-		IsIgnoreView       bool
 	}
 )
 
-func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
-	return &Notion{
-		PageID:             pageID,
-		TableIndexID:       tableIndexID,
-		cli:                gn.NewClient(token),
-		TablesByConnection: tables,
-		DriverName:         driverName,
-		IgnoreAttributes:   ignoreAttrs,
-		IsIgnoreView:       isIgnoreView,
+func NewNotion(pageID, tableIndexID, token string, info *definition.CommonInfo) (definition.Definition, error) {
+	if pageID == "" {
+		return nil, errors.New("notion-page-id is not set")
 	}
+	if token == "" {
+		return nil, errors.New("notion-token is not set")
+	}
+	return &Notion{
+		PageID:       pageID,
+		TableIndexID: tableIndexID,
+		cli:          gn.NewClient(token),
+		CommonInfo:   info,
+	}, nil
+}
+
+func (n *Notion) SetMermaid(m string) {
+	n.RawMermaid = m
 }
 
 func (n *Notion) Upsert(ctx context.Context) error {
+	if n.TablesByConnection == nil {
+		return nil
+	}
 	color.Green("Getting tables in Notion ...")
 
 	newListTableID := ""
@@ -58,13 +65,16 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 
 	tablesInNotionByName := map[string]definition.Table{}
-	tablesDefinedInNotion := make([]definition.Table, len(ls))
-	for i, l := range ls {
+	var tablesDefinedInNotion []definition.Table
+	for _, l := range ls {
+		if l.TableName == "Mermaid ERD" {
+			continue
+		}
 		t, err := n.getDefTable(ctx, l.PageID, l.TableName)
 		if err != nil {
 			return err
 		}
-		tablesDefinedInNotion[i] = *t
+		tablesDefinedInNotion = append(tablesDefinedInNotion, *t)
 		tablesInNotionByName[l.TableName] = *t
 	}
 	tablesByConnection := n.TablesByConnection
@@ -175,6 +185,60 @@ func (n *Notion) Upsert(ctx context.Context) error {
 		if err := n.createListRow(ctx, tableNameForNotion, *dbID); err != nil {
 			return err
 		}
+	}
+
+	if newListTableID != "" {
+		color.Yellow(
+			"We created new Table Index Database.\nYou have to set following config.\n\nkey: notion-table-index\nvalue: %s",
+			newListTableID,
+		)
+	}
+
+	return nil
+}
+
+func (n *Notion) Mermaid(ctx context.Context) error {
+	if n.RawMermaid == "" {
+		return nil
+	}
+
+	newListTableID := ""
+	if n.TableIndexID == "" {
+		id, err := n.createListTable(ctx)
+		if err != nil {
+			return err
+		}
+		n.TableIndexID = *id
+		newListTableID = *id
+		color.Green("Success to get tables in Notion!")
+	}
+
+	ls, err := n.getListTable(ctx)
+	if err != nil {
+		return err
+	}
+	// if already exists
+	for _, l := range ls {
+		if l.TableName == "Mermaid ERD" {
+			// drop mermaid ERD
+			if err := n.deleteRowOrTable(ctx, l.PageID); err != nil {
+				return err
+			}
+			// drop from list table
+			if err := n.deleteRowOrTable(ctx, l.ID); err != nil {
+				return err
+			}
+			break
+		}
+	}
+
+	color.Green("Writing Notion Mermaid ERD: ERD")
+	pID, err := n.createERD(ctx)
+	if err != nil {
+		return err
+	}
+	if err := n.createListRow(ctx, "Mermaid ERD", *pID); err != nil {
+		return err
 	}
 
 	if newListTableID != "" {

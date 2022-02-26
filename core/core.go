@@ -16,6 +16,7 @@ type (
 	SchemanState struct {
 		*boilingcore.State
 		IgnoreAttributes []string
+		Mermaid          string
 		Defs             map[Service]definition.Definition
 	}
 
@@ -45,6 +46,12 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		ignores[a]++
 	}
 	isIgnoreView := viper.GetBool("disable-views")
+	commonInfo := &definition.CommonInfo{
+		TablesByConnection: s.Tables,
+		DriverName:         config.DriverName,
+		IgnoreAttributes:   ignores,
+		IsIgnoreView:       isIgnoreView,
+	}
 
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
@@ -52,23 +59,46 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		case string(ServiceNotion):
 			pageID := viper.GetString("notion-page-id")
 			token := viper.GetString("notion-token")
-			if pageID == "" {
-				return nil, errors.New("notion-page-id is not set")
-			}
-			if token == "" {
-				return nil, errors.New("notion-token is not set")
-			}
-			s.Defs[ServiceNotion] = notion.NewNotion(
+			n, err := notion.NewNotion(
 				pageID,
 				viper.GetString("notion-table-index"),
 				token,
-				s.Tables,
-				config.DriverName,
-				ignores,
-				isIgnoreView,
+				commonInfo,
 			)
+			if err != nil {
+				return nil, err
+			}
+			s.Defs[ServiceNotion] = n
 		default:
 			return nil, errors.Errorf("The service have not been supported yet: %s", service)
+		}
+	}
+
+	mermaidOutputs := viper.GetStringSlice("erd-outputs")
+	if len(mermaidOutputs) != 0 {
+		s.Mermaid = s.genMermaid(isIgnoreView)
+	}
+	for _, m := range mermaidOutputs {
+		if d, ok := s.Defs[Service(m)]; ok {
+			d.SetMermaid(s.Mermaid)
+			continue
+		}
+
+		switch m {
+		case string(ServiceNotion):
+			pageID := viper.GetString("notion-page-id")
+			token := viper.GetString("notion-token")
+			n, err := notion.NewNotion(
+				pageID,
+				viper.GetString("notion-table-index"),
+				token,
+				commonInfo,
+			)
+			if err != nil {
+				return nil, err
+			}
+			s.Defs[ServiceNotion] = n
+			s.Defs[ServiceNotion].SetMermaid(s.Mermaid)
 		}
 	}
 
@@ -114,6 +144,9 @@ func (s *SchemanState) Run() error {
 	ctx := context.Background()
 	for _, def := range s.Defs {
 		if err := def.Upsert(ctx); err != nil {
+			return err
+		}
+		if err := def.Mermaid(ctx); err != nil {
 			return err
 		}
 	}
