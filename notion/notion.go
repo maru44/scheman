@@ -2,38 +2,36 @@ package notion
 
 import (
 	"context"
+	"errors"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/fatih/color"
 	"github.com/maru44/scheman/definition"
-	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 type (
 	Notion struct {
+		*definition.CommonInfo
 		PageID       string
 		TableIndexID string
 		MermaidERDID string
 		cli          *gn.Client
-
-		TablesByConnection []drivers.Table
-		DriverName         string
-		IgnoreAttributes   map[string]int
-		IsIgnoreView       bool
-		RawMermaid         string
 	}
 )
 
-func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
-	return &Notion{
-		PageID:             pageID,
-		TableIndexID:       tableIndexID,
-		cli:                gn.NewClient(token),
-		TablesByConnection: tables,
-		DriverName:         driverName,
-		IgnoreAttributes:   ignoreAttrs,
-		IsIgnoreView:       isIgnoreView,
+func NewNotion(pageID, tableIndexID, token string, info *definition.CommonInfo) (definition.Definition, error) {
+	if pageID == "" {
+		return nil, errors.New("notion-page-id is not set")
 	}
+	if token == "" {
+		return nil, errors.New("notion-token is not set")
+	}
+	return &Notion{
+		PageID:       pageID,
+		TableIndexID: tableIndexID,
+		cli:          gn.NewClient(token),
+		CommonInfo:   info,
+	}, nil
 }
 
 func (n *Notion) SetMermaid(m string) {
