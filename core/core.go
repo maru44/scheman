@@ -73,7 +73,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		}
 	}
 
-	mermaidOutputs := viper.GetStringSlice("mermaid-outputs")
+	mermaidOutputs := viper.GetStringSlice("erd-outputs")
 	if len(mermaidOutputs) != 0 {
 		s.Mermaid = s.genMermaid(isIgnoreView)
 	}
