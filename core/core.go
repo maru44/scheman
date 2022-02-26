@@ -63,7 +63,6 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			s.Defs[ServiceNotion] = notion.NewNotion(
 				pageID,
 				viper.GetString("notion-table-index"),
-				viper.GetString("notion-mermaid-id"),
 				token,
 				s.Tables,
 				config.DriverName,
@@ -81,29 +80,30 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	}
 	for _, m := range mermaidOutputs {
 		if d, ok := s.Defs[Service(m)]; ok {
-			d.SetMermaid(m)
-		} else {
-			switch m {
-			case string(ServiceNotion):
-				pageID := viper.GetString("notion-page-id")
-				token := viper.GetString("notion-token")
-				if pageID == "" {
-					return nil, errors.New("notion-page-id is not set")
-				}
-				if token == "" {
-					return nil, errors.New("notion-token is not set")
-				}
-				s.Defs[ServiceNotion] = notion.NewNotion(
-					pageID,
-					viper.GetString("notion-table-index"),
-					viper.GetString("notion-mermaid-id"),
-					token,
-					nil,
-					config.DriverName,
-					ignores,
-					isIgnoreView,
-				)
+			d.SetMermaid(s.Mermaid)
+			continue
+		}
+
+		switch m {
+		case string(ServiceNotion):
+			pageID := viper.GetString("notion-page-id")
+			token := viper.GetString("notion-token")
+			if pageID == "" {
+				return nil, errors.New("notion-page-id is not set")
 			}
+			if token == "" {
+				return nil, errors.New("notion-token is not set")
+			}
+			s.Defs[ServiceNotion] = notion.NewNotion(
+				pageID,
+				viper.GetString("notion-table-index"),
+				token,
+				nil,
+				config.DriverName,
+				ignores,
+				isIgnoreView,
+			)
+			s.Defs[ServiceNotion].SetMermaid(s.Mermaid)
 		}
 	}
 
@@ -211,15 +211,15 @@ func (s *SchemanState) genMermaid() string {
 				switch f.Nullable {
 				case true:
 					if r.Nullable {
-						rels += fmt.Sprintf("%s |o-o| %s : own\n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s |o--o| %s : own\n", r.TableName, f.TableName)
 					} else {
-						rels += fmt.Sprintf("%s |o-|| %s : own\n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s |o--|| %s : own\n", r.TableName, f.TableName)
 					}
 				case false:
 					if r.Nullable {
-						rels += fmt.Sprintf("%s ||-o| %s : own\n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s ||--o| %s : own\n", r.TableName, f.TableName)
 					} else {
-						rels += fmt.Sprintf("%s ||-|| %s : own\n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s ||--|| %s : own\n", r.TableName, f.TableName)
 					}
 				}
 				isOne = true
@@ -234,15 +234,15 @@ func (s *SchemanState) genMermaid() string {
 				switch f.Nullable {
 				case true:
 					if r.Nullable {
-						rels += fmt.Sprintf("%s |o-o{ %s : has \n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s |o--o{ %s : has \n", r.TableName, f.TableName)
 					} else {
-						rels += fmt.Sprintf("%s |o-|{ %s : has \n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s |o--|{ %s : has \n", r.TableName, f.TableName)
 					}
 				case false:
 					if r.Nullable {
-						rels += fmt.Sprintf("%s ||-o{ %s : has \n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s ||--o{ %s : has \n", r.TableName, f.TableName)
 					} else {
-						rels += fmt.Sprintf("%s ||-|{ %s : has \n", r.TableName, f.TableName)
+						rels += fmt.Sprintf("%s ||--|{ %s : has \n", r.TableName, f.TableName)
 					}
 				}
 				isOne = true

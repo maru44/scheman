@@ -24,11 +24,10 @@ type (
 	}
 )
 
-func NewNotion(pageID, tableIndexID, mermaidERDID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
+func NewNotion(pageID, tableIndexID, token string, tables []drivers.Table, driverName string, ignoreAttrs map[string]int, isIgnoreView bool) definition.Definition {
 	return &Notion{
 		PageID:             pageID,
 		TableIndexID:       tableIndexID,
-		MermaidERDID:       mermaidERDID,
 		cli:                gn.NewClient(token),
 		TablesByConnection: tables,
 		DriverName:         driverName,
@@ -68,13 +67,16 @@ func (n *Notion) Upsert(ctx context.Context) error {
 	}
 
 	tablesInNotionByName := map[string]definition.Table{}
-	tablesDefinedInNotion := make([]definition.Table, len(ls))
-	for i, l := range ls {
+	var tablesDefinedInNotion []definition.Table
+	for _, l := range ls {
+		if l.TableName == "Mermaid ERD" {
+			continue
+		}
 		t, err := n.getDefTable(ctx, l.PageID, l.TableName)
 		if err != nil {
 			return err
 		}
-		tablesDefinedInNotion[i] = *t
+		tablesDefinedInNotion = append(tablesDefinedInNotion, *t)
 		tablesInNotionByName[l.TableName] = *t
 	}
 	tablesByConnection := n.TablesByConnection
@@ -202,52 +204,50 @@ func (n *Notion) Mermaid(ctx context.Context) error {
 		return nil
 	}
 
-	typ := "mermaid"
-	if n.MermaidERDID == "" {
-		p, err := n.cli.CreatePage(ctx, gn.CreatePageParams{
-			ParentType: gn.ParentTypePage,
-			ParentID:   n.PageID,
-			Title: []gn.RichText{
-				{
-					Text: &gn.Text{
-						Content: "ERD",
-					},
-				},
-			},
-			Children: []gn.Block{
-				{
-					Type: gn.BlockTypeCode,
-					Code: &gn.Code{
-						Language: &typ,
-						RichTextBlock: gn.RichTextBlock{
-							Text: []gn.RichText{
-								{
-									Text: &gn.Text{
-										Content: n.RawMermaid,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		})
+	newListTableID := ""
+	if n.TableIndexID == "" {
+		id, err := n.createListTable(ctx)
 		if err != nil {
 			return err
 		}
-
-		color.Yellow(
-			"We created new ERD.\nYou have to set following config.\n\nkey: notion-mermaid-id\nvalue: %s",
-			p.ID,
-		)
-		return nil
+		n.TableIndexID = *id
+		newListTableID = *id
+		color.Green("Success to get tables in Notion!")
 	}
-	if _, err := n.cli.UpdatePage(ctx, n.MermaidERDID, gn.UpdatePageParams{
-		DatabasePageProperties: &gn.DatabasePageProperties{
-			"ERD": gn.DatabasePageProperty{},
-		},
-	}); err != nil {
+
+	ls, err := n.getListTable(ctx)
+	if err != nil {
 		return err
+	}
+	// if already exists
+	for _, l := range ls {
+		if l.TableName == "Mermaid ERD" {
+			// drop mermaid ERD
+			if err := n.deleteRowOrTable(ctx, l.PageID); err != nil {
+				return err
+			}
+			// drop from list table
+			if err := n.deleteRowOrTable(ctx, l.ID); err != nil {
+				return err
+			}
+			break
+		}
+	}
+
+	color.Green("Writing Notion Mermaid ERD: ERD")
+	pID, err := n.createERD(ctx)
+	if err != nil {
+		return err
+	}
+	if err := n.createListRow(ctx, "Mermaid ERD", *pID); err != nil {
+		return err
+	}
+
+	if newListTableID != "" {
+		color.Yellow(
+			"We created new Table Index Database.\nYou have to set following config.\n\nkey: notion-table-index\nvalue: %s",
+			newListTableID,
+		)
 	}
 
 	return nil

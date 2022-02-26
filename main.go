@@ -57,7 +57,6 @@ func main() {
 	rootCmd.PersistentFlags().StringP("notion-page-id", "", "", "Page id for notion")
 	rootCmd.PersistentFlags().StringP("notion-token", "", "", "Notion integration token")
 	rootCmd.PersistentFlags().StringP("notion-table-index", "", "", "Table List to refer table name and its definition database id")
-	rootCmd.PersistentFlags().StringP("notion-mermaid-id", "", "", "The block ID of Notion ERD written in mermaid.")
 
 	rootCmd.PersistentFlags().BoolP("disable-views", "", false, "If true, views are ignored and only tables are written")
 	rootCmd.PersistentFlags().StringArray("attr-ignore", []string{},
