@@ -2,10 +2,10 @@ package notion
 
 import (
 	"context"
-	"errors"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/fatih/color"
+	"github.com/friendsofgo/errors"
 	"github.com/maru44/scheman/definition"
 )
 
@@ -26,6 +26,7 @@ func NewNotion(pageID, tableIndexID, token string, info *definition.CommonInfo) 
 	if token == "" {
 		return nil, errors.New("notion-token is not set")
 	}
+
 	return &Notion{
 		PageID:       pageID,
 		TableIndexID: tableIndexID,

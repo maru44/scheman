@@ -3,9 +3,11 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://github.com/maru44/scheman/blob/master/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/maru44/scheman)](https://goreportcard.com/report/github.com/maru44/scheman)
 
-Scheman is a tool to write database schema from connected database.
+Scheman is a tool to write database schema from connected database. Also output ERD (mermaid).
 
 ![](https://user-images.githubusercontent.com/46714011/155822065-f0f9f785-b2b1-4abd-b98b-052496dff169.png)
+
+![](https://user-images.githubusercontent.com/46714011/155862202-77e81b99-681a-44fb-bf1c-669dae7f1f5a.png)
 
 #### Supported Databases
 
@@ -48,6 +50,7 @@ go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 \
 | ------------------ | ---------- | ------------------------------------------------ |
 | config             | "scheman"  |                                                  |
 | services           | ["NOTION"] |                                                  |
+| erd-outputs        | ["NOTION"] | mermaid format                                   |
 | notion-page-id     | ""         | required if output destinations contain "NOTION" |
 | notion-page-token  | ""         | required if output destinations contain "NOTION" |
 | notion-table-index | ""         |                                                  |
