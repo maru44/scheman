@@ -1,4 +1,5 @@
 attr-ignore = ["Auto Generate", "Comment"]
+disable-views = true
 
 [psql]
   dbname  = "scheman"
