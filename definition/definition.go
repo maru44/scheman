@@ -21,3 +21,8 @@ type (
 		RawMermaid         string
 	}
 )
+
+func (c *CommonInfo) IsShownAttr(attr string) bool {
+	_, ok := c.IgnoreAttributes[attr]
+	return ok
+}
