@@ -6,6 +6,7 @@ import (
 
 	"github.com/friendsofgo/errors"
 	"github.com/maru44/scheman/definition"
+	"github.com/maru44/scheman/file"
 	"github.com/maru44/scheman/notion"
 	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/v4/boilingcore"
@@ -25,6 +26,7 @@ type (
 
 const (
 	ServiceNotion = Service("NOTION")
+	ServiceFile   = Service("FILE")
 )
 
 func New(config *boilingcore.Config) (*SchemanState, error) {
@@ -69,6 +71,10 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				return nil, err
 			}
 			s.Defs[ServiceNotion] = n
+		case string(ServiceFile):
+			definitionFile := viper.GetString("def-file")
+			erdFile := viper.GetString("erd-file")
+			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, commonInfo)
 		default:
 			return nil, errors.Errorf("The service have not been supported yet: %s", service)
 		}
@@ -99,6 +105,11 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			}
 			s.Defs[ServiceNotion] = n
 			s.Defs[ServiceNotion].SetMermaid(s.Mermaid)
+		case string(ServiceFile):
+			definitionFile := viper.GetString("def-file")
+			erdFile := viper.GetString("erd-file")
+			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, commonInfo)
+			s.Defs[ServiceFile].SetMermaid(s.Mermaid)
 		}
 	}
 
