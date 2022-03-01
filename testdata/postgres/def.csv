@@ -1,25 +1,25 @@
 Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
 
-event_zero,id,uuid,true,true,false,gen_random_uuid(),
-,id2,integer,false,false,false,nextval('event_zero_id2_seq'::regclass),
-,day,enum,false,false,false,,'monday'|'tuesday'|'wednesday'|'thursday'|'friday'
+event_zero,id,uuid,✅,✅,,gen_random_uuid(),
+,id2,integer,,,,nextval('event_zero_id2_seq'::regclass),
+,day,enum,,,,,'monday'|'tuesday'|'wednesday'|'thursday'|'friday'
 
-multi_pks,id1,integer,true,false,false,,
-,id2,integer,true,false,false,,
+multi_pks,id1,integer,✅,,,,
+,id2,integer,✅,,,,
 
-rel2,id,uuid,true,true,false,gen_random_uuid(),
+rel2,id,uuid,✅,✅,,gen_random_uuid(),
 
-rel3,id,uuid,true,true,false,gen_random_uuid(),
-,username,varchar,false,true,false,,
+rel3,id,uuid,✅,✅,,gen_random_uuid(),
+,username,varchar,,✅,,,
 
-rel_rels,id,uuid,true,true,false,gen_random_uuid(),
-,rel_id,uuid,false,false,false,,
-,rel2_id,uuid,false,false,true,NULL,
-,rel3_username,varchar,false,true,true,NULL,
+rel_rels,id,uuid,✅,✅,,gen_random_uuid(),
+,rel_id,uuid,,,,,
+,rel2_id,uuid,,,✅,NULL,
+,rel3_username,varchar,,✅,✅,NULL,
 
-rels,id,uuid,true,true,false,gen_random_uuid(),
-,event_zero_id,uuid,false,false,true,NULL,
+rels,id,uuid,✅,✅,,gen_random_uuid(),
+,event_zero_id,uuid,,,✅,NULL,
 
-magic_views,event_id,uuid,false,false,true,NULL,
-,multi_id,integer,false,false,true,NULL,
+magic_views,event_id,uuid,,,✅,NULL,
+,multi_id,integer,,,✅,NULL,
 
