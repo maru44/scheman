@@ -1,0 +1,30 @@
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+event_zero,id,uuid,true,true,false,gen_random_uuid(),
+,id2,integer,false,false,false,nextval('event_zero_id2_seq'::regclass),
+,day,enum,false,false,false,,'monday'|'tuesday'|'wednesday'|'thursday'|'friday'
+
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+multi_pks,id1,integer,true,false,false,,
+,id2,integer,true,false,false,,
+
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+rel2,id,uuid,true,true,false,gen_random_uuid(),
+
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+rel3,id,uuid,true,true,false,gen_random_uuid(),
+,username,varchar,false,true,false,,
+
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+rel_rels,id,uuid,true,true,false,gen_random_uuid(),
+,rel_id,uuid,false,false,false,,
+,rel2_id,uuid,false,false,true,NULL,
+,rel3_username,varchar,false,true,true,NULL,
+
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+rels,id,uuid,true,true,false,gen_random_uuid(),
+,event_zero_id,uuid,false,false,true,NULL,
+
+Table Name,Column Name,Data Type,PK,Unique,Null,Default,Enum
+magic_views,event_id,uuid,false,false,true,NULL,
+,multi_id,integer,false,false,true,NULL,
+

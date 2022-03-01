@@ -10,7 +10,7 @@ func (n *Notion) createERD(ctx context.Context) (*string, error) {
 	typ := "mermaid"
 	p, err := n.cli.CreatePage(ctx, gn.CreatePageParams{
 		ParentType: gn.ParentTypePage,
-		ParentID:   n.PageID,
+		ParentID:   n.pageID,
 		Title: []gn.RichText{
 			{
 				Text: &gn.Text{

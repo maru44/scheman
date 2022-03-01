@@ -9,7 +9,7 @@ import (
 type (
 	Definition interface {
 		Upsert(context.Context) error
-		SetMermaid(string)
+		EnableMermaid()
 		Mermaid(context.Context) error
 	}
 
@@ -21,3 +21,8 @@ type (
 		RawMermaid         string
 	}
 )
+
+func (c *CommonInfo) IsShownAttr(attr string) bool {
+	_, ok := c.IgnoreAttributes[attr]
+	return ok
+}

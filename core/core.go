@@ -6,6 +6,7 @@ import (
 
 	"github.com/friendsofgo/errors"
 	"github.com/maru44/scheman/definition"
+	"github.com/maru44/scheman/file"
 	"github.com/maru44/scheman/notion"
 	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/v4/boilingcore"
@@ -16,7 +17,6 @@ type (
 	SchemanState struct {
 		*boilingcore.State
 		IgnoreAttributes []string
-		Mermaid          string
 		Defs             map[Service]definition.Definition
 	}
 
@@ -25,6 +25,7 @@ type (
 
 const (
 	ServiceNotion = Service("NOTION")
+	ServiceFile   = Service("FILE")
 )
 
 func New(config *boilingcore.Config) (*SchemanState, error) {
@@ -51,6 +52,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		DriverName:         config.DriverName,
 		IgnoreAttributes:   ignores,
 		IsIgnoreView:       isIgnoreView,
+		RawMermaid:         s.genMermaid(isIgnoreView),
 	}
 
 	services := viper.GetStringSlice("services")
@@ -69,18 +71,19 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				return nil, err
 			}
 			s.Defs[ServiceNotion] = n
+		case string(ServiceFile):
+			definitionFile := viper.GetString("def-file")
+			erdFile := viper.GetString("erd-file")
+			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, commonInfo)
 		default:
 			return nil, errors.Errorf("The service have not been supported yet: %s", service)
 		}
 	}
 
 	mermaidOutputs := viper.GetStringSlice("erd-outputs")
-	if len(mermaidOutputs) != 0 {
-		s.Mermaid = s.genMermaid(isIgnoreView)
-	}
 	for _, m := range mermaidOutputs {
 		if d, ok := s.Defs[Service(m)]; ok {
-			d.SetMermaid(s.Mermaid)
+			d.EnableMermaid()
 			continue
 		}
 
@@ -88,7 +91,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		case string(ServiceNotion):
 			pageID := viper.GetString("notion-page-id")
 			token := viper.GetString("notion-token")
-			n, err := notion.NewNotion(
+			n, err := notion.NewNotionOnlyMermaid(
 				pageID,
 				viper.GetString("notion-table-index"),
 				token,
@@ -98,7 +101,9 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				return nil, err
 			}
 			s.Defs[ServiceNotion] = n
-			s.Defs[ServiceNotion].SetMermaid(s.Mermaid)
+		case string(ServiceFile):
+			erdFile := viper.GetString("erd-file")
+			s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, commonInfo)
 		}
 	}
 
