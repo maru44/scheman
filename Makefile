@@ -2,7 +2,7 @@
 
 psql:
 	@go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 && go run main.go psql \
-		--services "FILE" --services "NOTION" --erd-outputs "NOTION" --erd-outputs "FILE" --erd-file ./testdata/postgres/erd.md --def-file ./testdata/postgres/def.tsv \
+		--services "FILE" --services "NOTION" --erd-outputs "NOTION" --erd-outputs "FILE" --erd-file ./testdata/postgres/erd.md --def-file ./testdata/postgres/def.csv \
 		--notion-token ${NOTION_TOKEN} --notion-page-id ${PSQL_NOTION_PAGE_ID} --notion-table-index ${PSQL_NOTION_TABLE_INDEX_ID}
 
 mysql:

@@ -85,7 +85,7 @@ func (f *File) Mermaid(ctx context.Context) error {
 		return errors.Wrap(err, "failed to open mermaid file")
 	}
 
-	if _, err := file.Write([]byte(f.RawMermaid)); err != nil {
+	if _, err := file.Write([]byte("```mermaid\n" + f.RawMermaid + "```\n")); err != nil {
 		return errors.Wrap(err, "failed to write mermaid file")
 	}
 	return nil
@@ -99,10 +99,9 @@ func (f *File) addAttr(showAttrs *[]string, attr string) {
 
 func (f *File) makeRowsSlice(shownAttrs []string) [][][]string {
 	var results [][][]string
+	results = append(results, [][]string{shownAttrs})
 	for _, t := range f.TablesByConnection {
-		result := make([][]string, len(t.Columns)+1)
-		result[0] = shownAttrs
-
+		table := make([][]string, len(t.Columns))
 		for i, col := range t.Columns {
 			rowAttr := make([]string, len(shownAttrs))
 			c := definition.ConvertCol(col, t.PKey, f.DriverName)
@@ -143,10 +142,10 @@ func (f *File) makeRowsSlice(shownAttrs []string) [][][]string {
 					rowAttr[ii] = strings.Join(c.Enum, "|")
 				}
 			}
-			result[i+1] = rowAttr
+			table[i] = rowAttr
 		}
 
-		results = append(results, result)
+		results = append(results, table)
 	}
 	return results
 }

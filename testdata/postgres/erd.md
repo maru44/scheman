@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
 
 rel2 |o--|{ rel_rels : has 
@@ -38,3 +39,5 @@ rels {
   uuid event_zero_id
 }
 
+
+```
