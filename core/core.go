@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/friendsofgo/errors"
@@ -53,8 +54,10 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		DriverName:         config.DriverName,
 		IgnoreAttributes:   ignores,
 		IsIgnoreView:       isIgnoreView,
+		RawMermaid:         s.Mermaid,
 	}
 
+	fmt.Println("")
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
 		switch service {
@@ -86,7 +89,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	}
 	for _, m := range mermaidOutputs {
 		if d, ok := s.Defs[Service(m)]; ok {
-			d.SetMermaid(s.Mermaid)
+			d.EnableMermaid()
 			continue
 		}
 
@@ -94,7 +97,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		case string(ServiceNotion):
 			pageID := viper.GetString("notion-page-id")
 			token := viper.GetString("notion-token")
-			n, err := notion.NewNotion(
+			n, err := notion.NewNotionOnlyMermaid(
 				pageID,
 				viper.GetString("notion-table-index"),
 				token,
@@ -104,12 +107,11 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				return nil, err
 			}
 			s.Defs[ServiceNotion] = n
-			s.Defs[ServiceNotion].SetMermaid(s.Mermaid)
 		case string(ServiceFile):
 			definitionFile := viper.GetString("def-file")
 			erdFile := viper.GetString("erd-file")
 			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, commonInfo)
-			s.Defs[ServiceFile].SetMermaid(s.Mermaid)
+			s.Defs[ServiceFile].EnableMermaid()
 		}
 	}
 

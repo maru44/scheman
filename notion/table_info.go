@@ -94,7 +94,7 @@ var (
 
 func (n *Notion) createDefTable(ctx context.Context, tableNameForNotion string) (*string, error) {
 	params := gn.CreateDatabaseParams{
-		ParentPageID: n.PageID,
+		ParentPageID: n.pageID,
 		Title: []gn.RichText{
 			{
 				Text: &gn.Text{

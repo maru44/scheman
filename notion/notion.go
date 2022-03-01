@@ -12,10 +12,12 @@ import (
 type (
 	Notion struct {
 		*definition.CommonInfo
-		PageID       string
-		TableIndexID string
-		MermaidERDID string
+		pageID       string
+		tableIndexID string
 		cli          *gn.Client
+
+		isDefinition bool
+		isMermaid    bool
 	}
 )
 
@@ -28,30 +30,48 @@ func NewNotion(pageID, tableIndexID, token string, info *definition.CommonInfo) 
 	}
 
 	return &Notion{
-		PageID:       pageID,
-		TableIndexID: tableIndexID,
+		pageID:       pageID,
+		tableIndexID: tableIndexID,
 		cli:          gn.NewClient(token),
 		CommonInfo:   info,
+		isDefinition: true,
 	}, nil
 }
 
-func (n *Notion) SetMermaid(m string) {
-	n.RawMermaid = m
+func NewNotionOnlyMermaid(pageID, tableIndexID, token string, info *definition.CommonInfo) (definition.Definition, error) {
+	if pageID == "" {
+		return nil, errors.New("notion-page-id is not set")
+	}
+	if token == "" {
+		return nil, errors.New("notion-token is not set")
+	}
+
+	return &Notion{
+		pageID:       pageID,
+		tableIndexID: tableIndexID,
+		cli:          gn.NewClient(token),
+		CommonInfo:   info,
+		isMermaid:    true,
+	}, nil
+}
+
+func (n *Notion) EnableMermaid() {
+	n.isMermaid = true
 }
 
 func (n *Notion) Upsert(ctx context.Context) error {
-	if n.TablesByConnection == nil {
+	if !n.isDefinition {
 		return nil
 	}
 	color.Green("Getting tables in Notion ...")
 
 	newListTableID := ""
-	if n.TableIndexID == "" {
+	if n.tableIndexID == "" {
 		id, err := n.createListTable(ctx)
 		if err != nil {
 			return err
 		}
-		n.TableIndexID = *id
+		n.tableIndexID = *id
 		newListTableID = *id
 	}
 
@@ -199,17 +219,17 @@ func (n *Notion) Upsert(ctx context.Context) error {
 }
 
 func (n *Notion) Mermaid(ctx context.Context) error {
-	if n.RawMermaid == "" {
+	if !n.isMermaid {
 		return nil
 	}
 
 	newListTableID := ""
-	if n.TableIndexID == "" {
+	if n.tableIndexID == "" {
 		id, err := n.createListTable(ctx)
 		if err != nil {
 			return err
 		}
-		n.TableIndexID = *id
+		n.tableIndexID = *id
 		newListTableID = *id
 		color.Green("Success to get tables in Notion!")
 	}

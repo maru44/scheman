@@ -9,7 +9,7 @@ import (
 type (
 	Definition interface {
 		Upsert(context.Context) error
-		SetMermaid(string)
+		EnableMermaid()
 		Mermaid(context.Context) error
 	}
 

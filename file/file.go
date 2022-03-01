@@ -14,7 +14,8 @@ import (
 type (
 	File struct {
 		*definition.CommonInfo
-		rawMermaid string
+		isDefinition bool
+		isMermaid    bool
 
 		definitionFile string
 		erdFile        string
@@ -29,39 +30,45 @@ func NewFile(definitionFile, erdFile string, info *definition.CommonInfo) defini
 	}
 }
 
-func (f *File) SetMermaid(m string) {
-	f.rawMermaid = m
+func (f *File) EnableMermaid() {
+	f.isMermaid = true
 }
 
 func (f *File) Upsert(ctx context.Context) error {
-	if f.definitionFile == "" {
+	if !f.isDefinition {
 		return nil
+	}
+	if f.definitionFile == "" {
+		return errors.New("You have to set def-file")
 	}
 
 	showAttrs := []string{"Table Name", "Column Name"}
-	f.addAttr(showAttrs, "Data Type")
-	f.addAttr(showAttrs, "PK")
-	f.addAttr(showAttrs, "Auto Generate")
-	f.addAttr(showAttrs, "Unique")
-	f.addAttr(showAttrs, "Null")
-	f.addAttr(showAttrs, "Default")
-	f.addAttr(showAttrs, "Comment")
-	f.addAttr(showAttrs, "Enum")
+	f.addAttr(&showAttrs, "Data Type")
+	f.addAttr(&showAttrs, "PK")
+	f.addAttr(&showAttrs, "Auto Generate")
+	f.addAttr(&showAttrs, "Unique")
+	f.addAttr(&showAttrs, "Null")
+	f.addAttr(&showAttrs, "Default")
+	f.addAttr(&showAttrs, "Comment")
+	f.addAttr(&showAttrs, "Enum")
 
 	ext := filepath.Ext(f.definitionFile)
 	fmt.Println(ext)
 	switch ext {
-	case "csv":
-		return f.writeCSV(showAttrs, ctx)
 	case "json":
 	case "tsv":
+	default:
+		return f.writeCSV(showAttrs, ctx)
 	}
 	return nil
 }
 
 func (f *File) Mermaid(ctx context.Context) error {
-	if f.erdFile == "" {
+	if !f.isMermaid {
 		return nil
+	}
+	if f.erdFile == "" {
+		return errors.New("You have to set erd-file")
 	}
 
 	file, err := os.OpenFile(f.erdFile, os.O_APPEND|os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0600)
@@ -69,15 +76,16 @@ func (f *File) Mermaid(ctx context.Context) error {
 		return errors.Wrap(err, "failed to open mermaid file")
 	}
 
-	if _, err := file.Write([]byte(f.rawMermaid)); err != nil {
+	if _, err := file.Write([]byte(f.RawMermaid)); err != nil {
 		return errors.Wrap(err, "failed to write mermaid file")
 	}
 	return nil
 }
 
-func (f *File) addAttr(showAttrs []string, attr string) {
+func (f *File) addAttr(showAttrs *[]string, attr string) {
 	if _, ok := f.IgnoreAttributes[attr]; !ok {
-		showAttrs = append(showAttrs, attr)
+		added := append(*showAttrs, attr)
+		fmt.Println(added)
 	}
 }
 
