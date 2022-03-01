@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/friendsofgo/errors"
@@ -18,7 +17,6 @@ type (
 	SchemanState struct {
 		*boilingcore.State
 		IgnoreAttributes []string
-		Mermaid          string
 		Defs             map[Service]definition.Definition
 	}
 
@@ -54,10 +52,9 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		DriverName:         config.DriverName,
 		IgnoreAttributes:   ignores,
 		IsIgnoreView:       isIgnoreView,
-		RawMermaid:         s.Mermaid,
+		RawMermaid:         s.genMermaid(isIgnoreView),
 	}
 
-	fmt.Println("")
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
 		switch service {
@@ -84,9 +81,6 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 	}
 
 	mermaidOutputs := viper.GetStringSlice("erd-outputs")
-	if len(mermaidOutputs) != 0 {
-		s.Mermaid = s.genMermaid(isIgnoreView)
-	}
 	for _, m := range mermaidOutputs {
 		if d, ok := s.Defs[Service(m)]; ok {
 			d.EnableMermaid()
@@ -108,10 +102,8 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			}
 			s.Defs[ServiceNotion] = n
 		case string(ServiceFile):
-			definitionFile := viper.GetString("def-file")
 			erdFile := viper.GetString("erd-file")
-			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, commonInfo)
-			s.Defs[ServiceFile].EnableMermaid()
+			s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, commonInfo)
 		}
 	}
 

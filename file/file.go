@@ -27,6 +27,15 @@ func NewFile(definitionFile, erdFile string, info *definition.CommonInfo) defini
 		definitionFile: definitionFile,
 		erdFile:        erdFile,
 		CommonInfo:     info,
+		isDefinition:   true,
+	}
+}
+
+func NewFileOnlyMermaid(erdFile string, info *definition.CommonInfo) definition.Definition {
+	return &File{
+		erdFile:    erdFile,
+		CommonInfo: info,
+		isMermaid:  true,
 	}
 }
 
@@ -53,12 +62,12 @@ func (f *File) Upsert(ctx context.Context) error {
 	f.addAttr(&showAttrs, "Enum")
 
 	ext := filepath.Ext(f.definitionFile)
-	fmt.Println(ext)
 	switch ext {
-	case "json":
-	case "tsv":
+	case ".json":
+	case ".tsv":
+		return f.writeTSV(showAttrs)
 	default:
-		return f.writeCSV(showAttrs, ctx)
+		return f.writeCSV(showAttrs)
 	}
 	return nil
 }
@@ -71,7 +80,7 @@ func (f *File) Mermaid(ctx context.Context) error {
 		return errors.New("You have to set erd-file")
 	}
 
-	file, err := os.OpenFile(f.erdFile, os.O_APPEND|os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0600)
+	file, err := os.OpenFile(f.erdFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return errors.Wrap(err, "failed to open mermaid file")
 	}
@@ -84,8 +93,7 @@ func (f *File) Mermaid(ctx context.Context) error {
 
 func (f *File) addAttr(showAttrs *[]string, attr string) {
 	if _, ok := f.IgnoreAttributes[attr]; !ok {
-		added := append(*showAttrs, attr)
-		fmt.Println(added)
+		*showAttrs = append(*showAttrs, attr)
 	}
 }
 
@@ -135,6 +143,7 @@ func (f *File) makeRowsSlice(shownAttrs []string) [][][]string {
 					rowAttr[ii] = strings.Join(c.Enum, "|")
 				}
 			}
+			result[i+1] = rowAttr
 		}
 
 		results = append(results, result)
