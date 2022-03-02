@@ -1,7 +1,7 @@
 # scheman
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://github.com/maru44/scheman/blob/master/LICENSE)
-![ActionsCI](https://github.com/maru44/scheman/workflows/ci/badge.svg)
+![ActionsCI](https://github.com/maru44/scheman/workflows/Test%20Lint/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/maru44/scheman)](https://goreportcard.com/report/github.com/maru44/scheman)
 
 Scheman is a tool to write database schema from connected database. Also output ERD (mermaid).
