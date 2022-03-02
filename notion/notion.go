@@ -59,10 +59,15 @@ func (n *Notion) EnableMermaid() {
 	n.isMermaid = true
 }
 
+func (n *Notion) IsDefinition() bool {
+	return n.isDefinition
+}
+
+func (n *Notion) IsMermaid() bool {
+	return n.isMermaid
+}
+
 func (n *Notion) Upsert(ctx context.Context) error {
-	if !n.isDefinition {
-		return nil
-	}
 	color.Green("Getting tables in Notion ...")
 
 	newListTableID := ""
@@ -219,10 +224,6 @@ func (n *Notion) Upsert(ctx context.Context) error {
 }
 
 func (n *Notion) Mermaid(ctx context.Context) error {
-	if !n.isMermaid {
-		return nil
-	}
-
 	newListTableID := ""
 	if n.tableIndexID == "" {
 		id, err := n.createListTable(ctx)

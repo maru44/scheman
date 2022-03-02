@@ -10,3 +10,6 @@ mysql:
 
 mssql:
 	@go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mssql@v4.8.6 && go run main.go mssql --notion-token ${NOTION_TOKEN} --notion-page-id ${MSSQL_NOTION_PAGE_ID}
+
+test:
+	@go test ./...
