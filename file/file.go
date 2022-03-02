@@ -42,10 +42,15 @@ func (f *File) EnableMermaid() {
 	f.isMermaid = true
 }
 
+func (n *File) IsDefinition() bool {
+	return n.isDefinition
+}
+
+func (n *File) IsMermaid() bool {
+	return n.isMermaid
+}
+
 func (f *File) Upsert(ctx context.Context) error {
-	if !f.isDefinition {
-		return nil
-	}
 	if f.definitionFile == "" {
 		return errors.New("You have to set def-file")
 	}
@@ -72,9 +77,6 @@ func (f *File) Upsert(ctx context.Context) error {
 }
 
 func (f *File) Mermaid(ctx context.Context) error {
-	if !f.isMermaid {
-		return nil
-	}
 	if f.erdFile == "" {
 		return errors.New("You have to set erd-file")
 	}

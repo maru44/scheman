@@ -28,6 +28,28 @@ const (
 	ServiceFile   = Service("FILE")
 )
 
+var Services = []Service{
+	ServiceNotion, ServiceFile,
+}
+
+func (s *SchemanState) Run() error {
+	ctx := context.Background()
+	for _, def := range s.Defs {
+		if def.IsDefinition() {
+			if err := def.Upsert(ctx); err != nil {
+				return err
+			}
+		}
+		if def.IsMermaid() {
+			if err := def.Mermaid(ctx); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func New(config *boilingcore.Config) (*SchemanState, error) {
 	s := &SchemanState{
 		State: &boilingcore.State{
@@ -55,6 +77,10 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		RawMermaid:         s.genMermaid(isIgnoreView),
 	}
 
+	return s.setDefinition(commonInfo)
+}
+
+func (s *SchemanState) setDefinition(info *definition.CommonInfo) (*SchemanState, error) {
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
 		switch service {
@@ -65,7 +91,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				pageID,
 				viper.GetString("notion-table-index"),
 				token,
-				commonInfo,
+				info,
 			)
 			if err != nil {
 				return nil, err
@@ -74,7 +100,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 		case string(ServiceFile):
 			definitionFile := viper.GetString("def-file")
 			erdFile := viper.GetString("erd-file")
-			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, commonInfo)
+			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, info)
 		default:
 			return nil, errors.Errorf("The service have not been supported yet: %s", service)
 		}
@@ -95,7 +121,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 				pageID,
 				viper.GetString("notion-table-index"),
 				token,
-				commonInfo,
+				info,
 			)
 			if err != nil {
 				return nil, err
@@ -103,7 +129,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 			s.Defs[ServiceNotion] = n
 		case string(ServiceFile):
 			erdFile := viper.GetString("erd-file")
-			s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, commonInfo)
+			s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, info)
 		}
 	}
 
@@ -142,19 +168,5 @@ func checkPKeys(tables []drivers.Table) error {
 	if len(missingPKey) != 0 {
 		return errors.Errorf("primary key missing in tables (%s)", strings.Join(missingPKey, ", "))
 	}
-	return nil
-}
-
-func (s *SchemanState) Run() error {
-	ctx := context.Background()
-	for _, def := range s.Defs {
-		if err := def.Upsert(ctx); err != nil {
-			return err
-		}
-		if err := def.Mermaid(ctx); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }

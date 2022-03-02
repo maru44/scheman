@@ -8,8 +8,11 @@ import (
 
 type (
 	Definition interface {
-		Upsert(context.Context) error
 		EnableMermaid()
+		IsDefinition() bool
+		IsMermaid() bool
+
+		Upsert(context.Context) error
 		Mermaid(context.Context) error
 	}
 
