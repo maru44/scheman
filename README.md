@@ -54,7 +54,7 @@ Install this package and write settings for connection.
 **_installation_**
 
 ```shell: installation
-go install github.com/maru44/scheman@v1.2.1
+go install github.com/maru44/scheman@v1.2.2
 ```
 
 **_example for PostgreSQL - Notion)_**
