@@ -68,7 +68,7 @@ go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 \
 
 ```shell: File - MySQL
 github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@v4.8.6 \
- && scheman mysql -c sqlboiler.toml --def-file def.csv --erd-file erd.md
+ && scheman mysql -c sqlboiler.toml --services file -- erd-outputs file --def-file def.csv --erd-file erd.md
 ```
 
 #### Generic config options
