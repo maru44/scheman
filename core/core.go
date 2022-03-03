@@ -83,7 +83,7 @@ func New(config *boilingcore.Config) (*SchemanState, error) {
 func (s *SchemanState) setDefinition(info *definition.CommonInfo) (*SchemanState, error) {
 	services := viper.GetStringSlice("services")
 	for _, service := range services {
-		switch service {
+		switch strings.ToUpper(service) {
 		case string(ServiceNotion):
 			pageID := viper.GetString("notion-page-id")
 			token := viper.GetString("notion-token")
@@ -108,12 +108,12 @@ func (s *SchemanState) setDefinition(info *definition.CommonInfo) (*SchemanState
 
 	mermaidOutputs := viper.GetStringSlice("erd-outputs")
 	for _, m := range mermaidOutputs {
-		if d, ok := s.Defs[Service(m)]; ok {
+		if d, ok := s.Defs[Service(strings.ToUpper(m))]; ok {
 			d.EnableMermaid()
 			continue
 		}
 
-		switch m {
+		switch strings.ToUpper(m) {
 		case string(ServiceNotion):
 			pageID := viper.GetString("notion-page-id")
 			token := viper.GetString("notion-token")
@@ -130,6 +130,8 @@ func (s *SchemanState) setDefinition(info *definition.CommonInfo) (*SchemanState
 		case string(ServiceFile):
 			erdFile := viper.GetString("erd-file")
 			s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, info)
+		default:
+			return nil, errors.Errorf("The service have not been supported yet: %s", m)
 		}
 	}
 
