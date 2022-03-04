@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/friendsofgo/errors"
 	"github.com/maru44/scheman/definition"
 	"github.com/maru44/scheman/file"
@@ -97,12 +98,8 @@ func (s *SchemanState) setDefinition(info *definition.CommonInfo) (*SchemanState
 				return nil, err
 			}
 			s.Defs[ServiceNotion] = n
-		case string(ServiceFile):
-			definitionFile := viper.GetString("def-file")
-			erdFile := viper.GetString("erd-file")
-			s.Defs[ServiceFile] = file.NewFile(definitionFile, erdFile, info)
 		default:
-			return nil, errors.Errorf("The service have not been supported yet: %s", service)
+			color.HiRed("The service have not been supported yet: %s", service)
 		}
 	}
 
@@ -127,12 +124,21 @@ func (s *SchemanState) setDefinition(info *definition.CommonInfo) (*SchemanState
 				return nil, err
 			}
 			s.Defs[ServiceNotion] = n
-		case string(ServiceFile):
-			erdFile := viper.GetString("erd-file")
-			s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, info)
 		default:
-			return nil, errors.Errorf("The service have not been supported yet: %s", m)
+			color.HiRed("The service have not been supported yet: %s", m)
 		}
+	}
+
+	defFile := viper.GetString("def-file")
+	erdFile := viper.GetString("erd-file")
+	if defFile != "" {
+		s.Defs[ServiceFile] = file.NewFile(defFile, erdFile, info)
+		d := s.Defs[ServiceFile]
+		if erdFile != "" {
+			d.EnableMermaid()
+		}
+	} else if erdFile != "" {
+		s.Defs[ServiceFile] = file.NewFileOnlyMermaid(erdFile, info)
 	}
 
 	return s, nil

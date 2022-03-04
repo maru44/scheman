@@ -4,7 +4,7 @@
 ![ActionsCI](https://github.com/maru44/scheman/workflows/Test%20Lint/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/maru44/scheman)](https://goreportcard.com/report/github.com/maru44/scheman)
 
-Scheman is a tool to write database schema from connected database. Also output ERD (mermaid).
+Scheman is a tool to describe tables schema or ERD of connected RDB.
 
 You can choose output destination from `Notion`, `File` or both of them.
 
@@ -54,37 +54,40 @@ Install this package and write settings for connection.
 **_installation_**
 
 ```shell: installation
-go install github.com/maru44/scheman@v1.2.2
+go install github.com/maru44/scheman@v1.3.0
 ```
 
 **_example for PostgreSQL - Notion)_**
 
 ```shell: Notion - PostgreSQL
 go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 \
- && scheman psql --notion-token ${NOTION_TOKEN} --notion-page-id ${PSQL_NOTION_PAGE_ID}
+ && scheman psql --services notion --erd-outputs notion \
+  --notion-token ${NOTION_TOKEN} --notion-page-id ${PSQL_NOTION_PAGE_ID}
 ```
+
+If you want to overwrite your schema-definition tables or ERD, you have to set `notion-table-index` after this command done. This value is oututted in your command line.
 
 **_example for MySQL - File with sqlboiler.toml)_**
 
 ```shell: File - MySQL
-github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@v4.8.6 \
- && scheman mysql -c sqlboiler.toml --services file -- erd-outputs file --def-file def.csv --erd-file erd.md
+go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@v4.8.6 \
+ && scheman mysql -c sqlboiler.toml --def-file def.csv --erd-file erd.md
 ```
 
 #### Generic config options
 
-| Name               | Defaults   |                                                                                                  |
-| ------------------ | ---------- | ------------------------------------------------------------------------------------------------ |
-| config             | "scheman"  | if you use sqlboiler, you can use sqlboiler.toml(.yaml) with setting this "sqlboiler.toml(.yaml) |
-| services           | ["NOTION"] | NOTION, FILE or both of them                                                                     |
-| erd-outputs        | ["NOTION"] | NOTION, FILE or both of them (mermaid format)                                                    |
-| notion-page-id     | ""         | required if output destinations contain "NOTION"                                                 |
-| notion-page-token  | ""         | required if output destinations contain "NOTION"                                                 |
-| notion-table-index | ""         | if you want to overwrite definition table, please fill this                                      |
-| def-file           | ""         | required if output destinations (for definition) contain "FILE"                                  |
-| erd-file           | ""         | required if output destinations (for ERD) contain "FILE"                                         |
-| disable-views      | false      |                                                                                                  |
-| attr-ignore        | [ ]        |                                                                                                  |
+| Name               | Defaults  |                                                                                                   |
+| ------------------ | --------- | ------------------------------------------------------------------------------------------------- |
+| config             | "scheman" | if you use sqlboiler, you can use sqlboiler.toml(.yaml) with setting this "sqlboiler.toml(.yaml)" |
+| services           | [ ]       | notion                                                                                            |
+| erd-outputs        | [ ]       | notion                                                                                            |
+| notion-page-id     | ""        | required if output destinations contain "notion"                                                  |
+| notion-page-token  | ""        | required if output destinations contain "notion"                                                  |
+| notion-table-index | ""        | if you want to overwrite definition table, please fill this                                       |
+| def-file           | ""        | The file name. required if output destinations if you want to output tables schema to file        |
+| erd-file           | ""        | The file name. required if output destinations if you want to output ERD to file                  |
+| disable-views      | false     |                                                                                                   |
+| attr-ignore        | [ ]       |                                                                                                   |
 
 #### Database Driver Configuration
 
@@ -103,3 +106,9 @@ Settings for database you want to connect.
 | blacklist | no       | []               | []            | []            |
 
 ref: https://github.com/volatiletech/sqlboiler#database-driver-configuration
+
+## thx
+
+https://github.com/volatiletech/sqlboiler
+
+https://github.com/dstotijn/go-notion
