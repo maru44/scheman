@@ -3,6 +3,7 @@ package core
 import (
 	"testing"
 
+	"github.com/fatih/color"
 	"github.com/maru44/scheman/definition"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,6 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 				"erd-outputs":    []string{string(ServiceNotion)},
 				"notion-page-id": "a",
 				"notion-token":   "a",
-				"erd-file":       "a",
 			},
 			wantIsNotionNil: false,
 			wantIsFileNil:   true,
@@ -43,8 +43,6 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 				"erd-outputs":    []string{string(ServiceNotion)},
 				"notion-page-id": "a",
 				"notion-token":   "a",
-				"def-file":       "a",
-				"erd-file":       "a",
 			},
 			wantIsNotionNil: false,
 			wantIsFileNil:   true,
@@ -56,12 +54,9 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 		{
 			name: "file only def",
 			envs: map[string]interface{}{
-				"services":       []string{string(ServiceFile)},
-				"erd-outputs":    []string{},
-				"notion-page-id": "a",
-				"notion-token":   "a",
-				"def-file":       "a",
-				"erd-file":       "a",
+				"services":    []string{},
+				"erd-outputs": []string{},
+				"def-file":    "a",
 			},
 			wantIsNotionNil: true,
 			wantIsFileNil:   false,
@@ -71,10 +66,25 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 			wantIsFileERD:   false,
 		},
 		{
+			name: "file only erd",
+			envs: map[string]interface{}{
+				"services":    []string{},
+				"erd-outputs": []string{},
+				"def-file":    "a",
+				"erd-file":    "a",
+			},
+			wantIsNotionNil: true,
+			wantIsFileNil:   false,
+			wantIsNotionDef: false,
+			wantIsNotionERD: false,
+			wantIsFileDef:   true,
+			wantIsFileERD:   true,
+		},
+		{
 			name: "all",
 			envs: map[string]interface{}{
-				"services":       []string{string(ServiceFile), string(ServiceNotion)},
-				"erd-outputs":    []string{string(ServiceFile), string(ServiceNotion)},
+				"services":       []string{string(ServiceNotion)},
+				"erd-outputs":    []string{string(ServiceNotion)},
 				"notion-page-id": "a",
 				"notion-token":   "a",
 				"def-file":       "a",
@@ -92,6 +102,7 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			color.Red(tt.name)
 			for k, v := range tt.envs {
 				viper.Set(k, v)
 			}
