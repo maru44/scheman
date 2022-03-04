@@ -4,7 +4,7 @@
 ![ActionsCI](https://github.com/maru44/scheman/workflows/Test%20Lint/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/maru44/scheman)](https://goreportcard.com/report/github.com/maru44/scheman)
 
-Scheman is a tool to describe tables schema or ERD of connected RDB.
+Scheman is a tool to visualize tables schema or ERD of connected RDB.
 
 You can choose output destination from `Notion`, `File` or both of them.
 
