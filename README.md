@@ -103,3 +103,9 @@ Settings for database you want to connect.
 | blacklist | no       | []               | []            | []            |
 
 ref: https://github.com/volatiletech/sqlboiler#database-driver-configuration
+
+#### thx
+
+https://github.com/volatiletech/sqlboiler
+
+https://github.com/dstotijn/go-notion
