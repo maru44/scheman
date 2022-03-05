@@ -24,8 +24,8 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 		{
 			name: "notion def + erd",
 			envs: map[string]interface{}{
-				"services":       []string{string(ServiceNotion)},
-				"erd-outputs":    []string{string(ServiceNotion)},
+				"services":       []string{"Notion"},
+				"erd-outputs":    []string{"Notion"},
 				"notion-page-id": "a",
 				"notion-token":   "a",
 			},
@@ -40,7 +40,7 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 			name: "notion only erd",
 			envs: map[string]interface{}{
 				"services":       []string{},
-				"erd-outputs":    []string{string(ServiceNotion)},
+				"erd-outputs":    []string{"notioN"},
 				"notion-page-id": "a",
 				"notion-token":   "a",
 			},
@@ -83,8 +83,8 @@ func Test_SetDefinitionToSchemanState(t *testing.T) {
 		{
 			name: "all",
 			envs: map[string]interface{}{
-				"services":       []string{string(ServiceNotion)},
-				"erd-outputs":    []string{string(ServiceNotion)},
+				"services":       []string{"notion"},
+				"erd-outputs":    []string{"NOTION"},
 				"notion-page-id": "a",
 				"notion-token":   "a",
 				"def-file":       "a",
