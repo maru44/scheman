@@ -6,9 +6,11 @@
 
 Scheman is a tool to visualize tables schema or ERD of connected RDB.
 
+Main purpose of this is accelerating working collaboration between engineers and non-engineers.
+
 You can choose output destination from `Notion`, `File` or both of them.
 
-### Images
+### Sample Images
 
 Here is examples for output.
 
