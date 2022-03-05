@@ -69,6 +69,8 @@ go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.8.6 \
 
 If you want to overwrite your schema-definition tables or ERD, you have to set `notion-table-index` after this command done. This value is oututted in your command line.
 
+![](https://user-images.githubusercontent.com/46714011/156856299-67bed77d-d744-458f-9967-61d50983eade.png)
+
 **_example for MySQL - File with sqlboiler.toml)_**
 
 ```shell: File - MySQL
